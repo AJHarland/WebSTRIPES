@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Audio calibration</title>
+    <script src = "jspsych-6.0.5/jspsych.js" type="text/javascript"></script>
+    <script src = "jspsych-6.0.5/plugins/jspsych-instructions-hide-back-button.js" type="text/javascript"></script>
+    <script src = "jspsych-6.0.5/plugins/jspsych-audio-button-response.js"></script>
+    <link rel="stylesheet" type="text/css" href="jspsych-6.0.5/css/jspsych.css">
+    <link rel="stylesheet" href="css/listen_up_incubator.css" title="preferred"></link> 
+    <script src="jatos.js"></script> 
+</head>
+<body>
+</body>
+<script type="text/javascript">
+jatos.onLoad(function() {
+    var file_path = "audio/calibration/";
+    var file_name = "sand_calibration.mp3";
+    var full_file_name = [file_path, file_name].join("");
+    // var audio_html = "<div><audio src='" + full_file_name + "' autoplay></div><div><p>Please adjust the volume on your computer so that the audio is playing at a loud but comfortable level.</p><p>When you are finished, click the 'Done' button.</p></div>";
+    var timeline = [];
+
+    var start_task = {
+        type: 'instructions-hide-back-button',
+        pages: ['<p>You must be wearing headphones to do these tasks, so please put them on now.</p>' +
+                '<p>Then set your computer volume to about 30% of maximum.</p>' +
+                '<p>When you click "Next", you will hear a word repeated in a loop.</p>' +
+                '<p>While the audio is playing, you should set your computer volume so that you can hear it ' +
+                'at a clear and comfortable level.</p><p>Click &#39;Next&#39; to start.</p>'],
+        show_clickable_nav: true,
+        post_trial_gap: 1000,
+        data: {task_segment: 'instructions'}
+    };
+    timeline.push(start_task);
+
+    var audio_calibration_trial = {
+        type: 'audio-button-response',
+        stimulus: full_file_name,
+        prompt: "<p>Please adjust the volume on your computer so that the audio is playing at a clear and comfortable level.</p><p>When you are finished, click the 'Done' button.</p>",
+        choices: ['Done'],
+        button_html: "<button class='jspsych-btn'>%choice%</button>", 
+        timing_response: 4000,
+        response_ends_trial: true,
+        trial_ends_after_audio: true,
+        ignore_responses_during_audio: false,
+        post_trial_gap: 0,
+        data: {task_segment: 'audio_calibration'}
+    };
+
+    var audio_calibration_loop = {
+        timeline: [audio_calibration_trial],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].button_pressed === "0") { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+    timeline.push(audio_calibration_loop);
+
+    jsPsych.init({
+        timeline: timeline,
+        fullscreen: false,
+        default_iti: 0,
+        show_progress_bar: false,
+        preload_audio: [full_file_name],
+        show_preload_progress_bar: true,
+        on_finish: function() {
+            jatos.submitResultData(jsPsych.data.get().json(), jatos.startNextComponent);
+        }
+    });      
+});
+</script>
+</html>

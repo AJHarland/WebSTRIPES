@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Which was better?</title>
+  <script src="jspsych-6.0.5/jspsych.js"></script>
+  <script src="jspsych-6.0.5/plugins/jspsych-instructions-hide-back-button.js"></script>
+  <script src="jspsych-6.0.5/plugins/jspsych-instructions-show-back-button.js"></script>
+  <script src="jspsych-6.0.5/plugins/jspsych-listen-up.js"></script>
+  <script src="jspsych-6.0.5/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="js/practice_items.js"></script>
+  <link rel="stylesheet" href="jspsych-6.0.5/css/jspsych.css"></link>
+  <!-- later CSS rules overwrite earlier ones, so load listen up CSS *after* jsPsych CSS -->
+  <link rel="stylesheet" href="css/listen_up_incubator.css" title="preferred"></link> 
+  <script src="jatos.js"></script>
+  <style>
+    .instructions-text {width: 1000px; max-width: 1000px;}
+    .instructions-img {width: 30%; border: 1px solid black;}
+  </style>
+</head>
+<body></body>
+<script>
+  jatos.onLoad(function() {
+
+    var practice_timeline = [];
+    var practice_loop_timeline = [];
+    var practice_difficulty = 1.0;
+    var performance_threshold = 0.6; // must get at least this proportion correct, otherwise repeat practice 
+    var repeat_practice = false;
+    var repeat_practice_count = 0;
+    var repeat_practice_limit = 3; // task will stop if performance criteria not met after this many practice repeats
+    var repeat_practice_limit_reached = false;
+
+    // info for preloading
+    var all_image_files = [];
+    var all_audio_files = [];
+    var item_image_path = 'images/items/catch/';
+    var speaker_image_path = 'images/speaker_icons/';
+    var audio_path = 'audio/practice/'; 
+
+    // alien images for preloading
+    var speaker_off_img = speaker_image_path.concat('sound_off.jpg');
+    var speaker_on_img = speaker_image_path.concat('sound_on.jpg');
+    all_image_files.push(speaker_off_img);
+    all_image_files.push(speaker_on_img);
+
+    // helper functions
+    //   function to set up practice trials
+    function set_up_trial_data(item_type_obj, difficulty_level) {
+
+      var item_path;
+      var aud_x, aud_word, aud_foil;
+      var word = item_type_obj.word;
+      var img = item_image_path + item_type_obj.word + '.jpg';
+
+      var trial_type = (item_type_obj.type == "word") ? "word_foil" : "nonword_foil";
+      var foil = (trial_type == "word_foil") ? practice_items[word].foil_word : practice_items[word].foil_nonword;
+      item_path = word + '_' + foil;
+      aud_x = audio_path + item_path + '/' + word + '.mp3';
+      aud_word = audio_path + item_path + '/' + word + '.wav_' + foil + '.wav_td_' + (1-difficulty_level).toFixed(2).toString() + '.mp3';
+      aud_foil = audio_path + item_path + '/' + word + '.wav_' + foil + '.wav_td_' + difficulty_level.toFixed(2).toString() + '.mp3';
+
+      // add the item images and audio for preloading
+      all_image_files.push(img);
+      all_audio_files.push(aud_x, aud_word, aud_foil);
+
+      trial_rand_choice = rand_choice_order(
+        {word: word, foil: foil}, 
+        {target: aud_x, word: aud_word, foil: aud_foil}
+      );
+      var trial_info = {
+        item: word,
+        foil: foil,
+        type: trial_type,
+        path: item_path,
+        stimuli: trial_rand_choice.stimuli,
+        stim_image: img,
+        difficulty: difficulty_level,
+        choice1: trial_rand_choice.choice1,
+        choice2: trial_rand_choice.choice2,
+        correct_choice: trial_rand_choice.correct,
+        trial_segment: "listen_up_practice"
+      };
+      return trial_info;
+    }
+
+    // function to generate feedback text after each trial
+    function feedback_fn() {
+      var last_trial = jsPsych.data.getLastTrialData().values();
+      if (last_trial[0].accuracy) {
+        return '<div id="feedback"><span id="feedback-corr">Correct!</span></div>';
+      } else {
+        return '<div id="feedback"><span id="feedback-incorr">Incorrect</span></div>';
+      }
+    }
+
+    // randomize order of audio choice files
+    // output stimuli array, choice order, and correct response
+    function rand_choice_order(choice_obj, aud_stim_obj) {
+      //var rand = Math.round(Math.random()); // 1 or 0
+      var rand = (i % 2 === 0) ? 0 : 1; // alternate the correct/incorrect order for practice trials
+      var output_obj = {};
+      if (rand) {
+        // word first, foil second
+        output_obj.choice1 = choice_obj.word;
+        output_obj.choice2 = choice_obj.foil;
+        output_obj.correct = 1;
+        output_obj.stimuli = [aud_stim_obj.target, aud_stim_obj.word, aud_stim_obj.foil];
+      } else {
+        // foil first, word second
+        output_obj.choice1 = choice_obj.foil;
+        output_obj.choice2 = choice_obj.word;
+        output_obj.correct = 2;
+        output_obj.stimuli = [aud_stim_obj.target, aud_stim_obj.foil, aud_stim_obj.word];
+      }
+      return output_obj;
+    }
+
+    // set up pratice trials
+    var practice_items_array = Object.keys(practice_items);
+    for (var i=0; i<practice_items_array.length; i++) {
+
+      var foil_type = ('foil_word' in practice_items[practice_items_array[i]]) ? 'word' : 'nonword';
+      practice_item_info = {word: practice_items_array[i], type: foil_type};
+      practice_trial_data = set_up_trial_data(practice_item_info, practice_difficulty);
+
+      var practice_trial = {
+        type: 'listen-up',
+        stimuli: practice_trial_data.stimuli,
+        stimuli_timing: [1000, 1000, 1000],
+        choices: ['1', '2'],
+        button_html_default: ['<button class="jspsych-btn speaker-btn"><img class="speaker-img" src="' + speaker_off_img + '"></button>','<button class="jspsych-btn speaker-btn"><img class="speaker-img" src="' + speaker_off_img + '"></button>'],
+        button_html_audio: ['<button class="jspsych-btn speaker-btn"><img class="speaker-img" src="' + speaker_on_img + '"></button>','<button class="jspsych-btn speaker-btn"><img class="speaker-img"src="' + speaker_on_img + '"></button>'],
+        disable_buttons_during_audio: true,
+        prompt: '<div id="prompt"><img class="item-img" src="' + practice_trial_data.stim_image + '"></div>',
+        trial_duration: null,
+        margin_vertical: '0px',
+        margin_horizontal: '70px',
+        response_ends_trial: true,
+        trial_ends_after_audio: false,
+        trial_duration: 20000,
+        data: practice_trial_data,
+        on_finish: function(data) {
+          data.response_choice = parseInt(data.button_pressed,10) + 1;
+          data.accuracy = data.response_choice == data.correct_choice;
+        }
+      };
+      practice_loop_timeline.push(practice_trial);
+      var feedback = {
+        type: 'html-keyboard-response',
+        stimulus: feedback_fn,
+        choices: jsPsych.NO_KEYS,
+        trial_duration: 2000,
+        data: {trial_segment: "feedback"},
+        on_finish: function(data) {
+          document.getElementById('jspsych-content').style.margin = "auto";
+        }
+      };
+      practice_loop_timeline.push(feedback);
+    }
+
+    // screen to show if performance threshold not met - this goes inside of a conditional node
+    var repeat_practice_screen = {
+      type: 'instructions-hide-back-button',
+      pages: ['<div class="instructions-text"><p>You did not get enough correct responses to continue.</p><p>Remember that your task is to click on the speaker that sounded <em>more like</em> the target word.</p><p>Please make sure that you are in a quiet environment so that you can hear the sounds clearly.</p><p>Click the &#39;Next&#39; button to repeat the practice trials.</p></div>'],
+      show_clickable_nav: true,
+      button_label_next: "Next"
+    };
+    var repeat_practice_conditional = {
+      timeline: [repeat_practice_screen],
+      conditional_function: function() {
+        repeat_practice_count++;
+        var trial_data = jsPsych.data.get().filter({trial_segment: 'listen_up_practice'}).values();
+        var last_trials = trial_data.slice(-practice_items_array.length);
+        var acc_count=0;
+        var trial_count=0;
+        for (var j=0; j<last_trials.length; j++) {
+          if (last_trials[j].accuracy === true) {
+            acc_count++;
+          }
+          trial_count++;
+        }
+        if ((acc_count/trial_count) < performance_threshold) {
+          if (repeat_practice_count >= repeat_practice_limit) {
+            // didn't meet performance threshold and has reached the limit for number of practice attempts
+            // don't repeat practice again and end the task
+            repeat_practice_limit_reached = true;
+            return false;
+          } else {
+            // didn't meet performance threshold, so show the repeat practice message
+            repeat_practice = true;
+            return true;
+          }
+        } else {
+          // met performance threshold so do not show the repeat practice message
+          return false;
+        }
+      }
+    };
+    practice_loop_timeline.push(repeat_practice_conditional);
+    
+    // loop node to repeat practice trials and repeat_practice_conditional if performance threshold not met
+    var repeat_practice_loop_node = {
+      timeline: practice_loop_timeline,
+      loop_function: function(data) {
+        if (repeat_practice) {
+          // didn't meet performance threshold, so repeat practice
+          repeat_practice = false;
+          return true;
+        } else {
+          // met performance threshold, so do not repeat practice
+          return false;
+        }
+      }
+    };
+
+    practice_timeline.push(repeat_practice_loop_node);
+
+    // end task early if performance criteria not met after maximum number of practice repeats
+    var end_task = {
+      type: 'html-keyboard-response',
+      stimulus: '<div class="instructions-text"><p>You made too many unsuccessful attempts in the practice trials, so the experiment has now ended.</p><p>You will still be paid for the time you spent on this study.</p><p>You may end this session by closing your browser tab or window.<p></div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: null,
+      data: {trial_segment: "practice_end_task"},
+      on_start: function() {
+        var end_study_fn = function() {
+          jatos.endStudyAjax(false, 'failed practice');
+        };
+        jatos.submitResultData(jsPsych.data.get().json(), end_study_fn);
+      }
+    };
+    var end_task_conditional = {
+      timeline: [end_task],
+      conditional_function: function() {
+        if (repeat_practice_limit_reached) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    };
+    practice_timeline.push(end_task_conditional);
+
+    var start_task = {
+      type: 'instructions-hide-back-button',
+      pages: ['<div class="instructions-text"><p>You have finished the practice trials and are ready to start the task.</p><p>You will no longer see feedback after each trial.</p><p>This task takes about 30 minutes to complete.</p><p>The task is broken up into blocks of trials,<br>and you will have the chance to take short breaks between blocks.</p><p>Remember that this is a test of your perception,<br>and some of the trials will be more difficult than the ones you&#39;ve done so far.<br>So please listen carefully and make sure you are in a quiet environment before you start.<p><p>Please click the &#39;Start&#39; button to start the task.</p></div>'],
+      show_clickable_nav: true,
+      button_label_next: "Start"
+    };
+    practice_timeline.push(start_task);
+
+    jsPsych.init({
+      timeline: practice_timeline,
+      preload_images: all_image_files,
+      preload_audio: all_audio_files,
+      on_finish: function() {
+        jatos.submitResultData(jsPsych.data.get().json(), jatos.startNextComponent);
+      }
+    });
+  });
+</script>
+</html>

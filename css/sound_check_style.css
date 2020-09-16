@@ -1,0 +1,25 @@
+.jspsych-content {
+    width: 75%; 
+    text-align: center;
+} 
+
+input[type='text'], textarea {
+    font-size: 26px !important; 
+    padding: 8px 8px; 
+    text-align: center; 
+    font-family: sans-serif;
+}
+
+/* style for back/next navigation buttons */
+button#jspsych-instructions-next, button#jspsych-instructions-back, button.jspsych-btn, input[type='submit'].jspsych-survey-html-form, input[type='submit'].jspsych-btn {
+    color: black;
+    border: 2px solid black;
+    background: #EEE;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+button#jspsych-instructions-next:active, button#jspsych-instructions-back:active, button.jspsych-btn:active, input[type='submit'].jspsych-survey-html-form:active, input[type='submit'].jspsych-btn:active {
+    background-color: black;
+    color: white;
+}

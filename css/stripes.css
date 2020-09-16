@@ -1,0 +1,109 @@
+/*** general layout ***/
+
+.jspsych-content {
+    text-align: center;
+} 
+
+/*** text input boxes ***/
+.jspsych-display-element input[type='text'], textarea, input[type="number"] {
+    font-size: 18px; 
+    font-family: sans-serif;
+    padding: 5px;
+    margin-left: 15px;
+    margin-right: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-width: 3px;
+}
+
+/* instructions text */
+.instructions-text {
+    width: 100%; 
+    max-width: 100%;
+    line-height: 1.5em;
+    font-size: 25px;
+}
+
+/*** non-STRIPES buttons ***/
+
+button#jspsych-instructions-next, button#jspsych-instructions-back, button.jspsych-btn, input[type='submit'].jspsych-survey-html-form {
+    color: black;
+    border: 2px solid black;
+    background: #EEE;
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+/*** STRIPES buttons ***/
+
+div.no-cursor {
+    cursor: none;
+} 
+
+/* common formatting for A/X/B buttons */
+button.stripes-btn {
+    padding: 40px 60px 40px 60px;
+    margin: 0px; 
+    border: 2px solid black; 
+    border-color: black;
+    color: black;
+    font-weight: bold;
+    font-size: 60px;
+    display: inline-flex;
+}
+
+/* reference (X) button */
+button.stripes-btn.stripes-btn-reference {
+    background-color: #dddddd; 
+}
+
+/* target (A and B) buttons */
+button.stripes-btn.stripes-btn-target {
+    background-color: #bbbbbb; 
+}
+
+/* all buttons A/X/B when audio is on */
+div.jspsych-audio-button-response-button button.stripes-btn.stripes-audio-on {
+    background-color: dodgerblue !important;
+}
+
+/* while all buttons are disabled */
+button.stripes-btn:disabled, button.stripes-btn[disabled] {
+    border: 2px solid rgb(133, 133, 133); 
+    cursor: none;
+    color: black;
+}
+
+/* while being clicked */
+button.stripes-btn:active {
+    background-color: dodgerblue;
+}
+
+/*** STRIPES text ***/
+
+/* prompt */
+div#jspsych-stripes-prompt {
+    font-size: 25px;
+    line-height: 1.5em;
+    height: 70px;
+}
+
+/* Correct/incorrect feedback text */
+
+span.feedback {
+    font-size: 50px;
+    font-weight: bold;
+}
+
+/*** staircase graph ***/
+
+div#endFeedback {
+    margin-top: 50px;
+    text-align: center;
+}
+
+div#graph {
+    width: 80%; 
+    display: block; 
+    margin: auto;
+}
