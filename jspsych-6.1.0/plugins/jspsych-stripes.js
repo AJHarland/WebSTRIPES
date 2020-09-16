@@ -25,7 +25,7 @@ jsPsych.plugins["stripes"] = (function() {
         pretty_name: 'stimuli',
         default: undefined,
         array: true,
-        description: 'The audio files to play. The first file is the correct response, and the second file is incorrect. '+
+        description: 'The audio files to play. The first file is the correct response, the second and third files are incorrect. '+
           'The order that these files play in is determined by the correct_choice parameter.'
 			},
       stimuli_timing: {
@@ -60,6 +60,14 @@ jsPsych.plugins["stripes"] = (function() {
         array: false,
         description: 'Difficulty level (floating point) used for adjusting the task difficulty.'
       },
+      rove: {
+        type: jsPsych.plugins.parameterType.FLOAT,
+        pretty_name: 'Rove',
+        default: 1,
+        array: false,
+        description: 'Rove level (floating point) used for adjusting the task difficulty.'
+      },
+
       button_html_off: {
         type: jsPsych.plugins.parameterType.HTML_STRING,
         pretty_name: 'Button HTML for sound off',
@@ -208,8 +216,8 @@ jsPsych.plugins["stripes"] = (function() {
 
     // check parameters and set defaults
     // stimuli array
-    if (trial.stimuli.length !== 2) {
-      console.error('Error in stripes plugin. The stimuli must be an array with 2 audio files.')
+    if (trial.stimuli.length !== 3) {
+      console.error('Error in stripes plugin. The stimuli must be an array with 3 audio files.')
     } 
 
     // set up the stimuli timing array
@@ -252,9 +260,9 @@ jsPsych.plugins["stripes"] = (function() {
     if (trial.correct_choice == "A") {
       audio_array.push(trial.stimuli[0]);
       audio_array.push(trial.stimuli[1]);
-      audio_array.push(trial.stimuli[1]);
+      audio_array.push(trial.stimuli[2]);
     } else {
-      audio_array.push(trial.stimuli[1]);
+      audio_array.push(trial.stimuli[2]);
       audio_array.push(trial.stimuli[1]);
       audio_array.push(trial.stimuli[0]);
     }
@@ -367,6 +375,7 @@ jsPsych.plugins["stripes"] = (function() {
         "button_pressed": response.button,
         "accuracy": response.accuracy,
         "difficulty": trial.difficulty,
+        "rove": trial.rove,
         "stimuli": trial.stimuli,
         "correct_response": trial.correct_choice
       };
@@ -411,7 +420,7 @@ jsPsych.plugins["stripes"] = (function() {
     function play_next() {
       // is this the 2nd sound file ("reference") or not (one of the choices, "target")?
       var is_target_sound = true;
-      if (audio_count === 1) {
+      if (audio_count !== 0) {
         is_target_sound = false;
       }
       // is this the last of the audio choices?
