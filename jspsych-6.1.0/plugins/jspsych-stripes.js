@@ -255,7 +255,7 @@ jsPsych.plugins["stripes"] = (function() {
 
     // setup audio_array
     // this should contain the three sound files, in order: A, X and B
-    // trial.stimuli[0] is always correct, trial.stimuli[1] is always incorrect
+    // trial.stimuli[0] is always correct, trial.stimuli[1] and [2] are always incorrect
     audio_array = [];
     if (trial.correct_choice == "A") {
       audio_array.push(trial.stimuli[0]);
@@ -418,7 +418,7 @@ jsPsych.plugins["stripes"] = (function() {
 
 		// function to start next audio
     function play_next() {
-      // is this the 2nd sound file ("reference") or not (one of the choices, "target")?
+      // is this the 1st sound file ("target") or not ("reference")?
       var is_target_sound = true;
       if (audio_count !== 0) {
         is_target_sound = false;
