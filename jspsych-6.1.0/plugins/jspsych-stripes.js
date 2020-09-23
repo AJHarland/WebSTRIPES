@@ -418,9 +418,9 @@ jsPsych.plugins["stripes"] = (function() {
 
 		// function to start next audio
     function play_next() {
-      // is this the 1st sound file ("target") or not ("reference")?
+      // is this the 2nd sound file ("target" aka X) or not ("reference" aka 'A' or 'B')?
       var is_target_sound = true;
-      if (audio_count !== 0) {
+      if (audio_count === 1) {
         is_target_sound = false;
       }
       // is this the last of the audio choices?
