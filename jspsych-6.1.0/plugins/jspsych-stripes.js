@@ -53,19 +53,19 @@ jsPsych.plugins["stripes"] = (function() {
         description: 'The correct response on this trial, either "A" (first sound) or "B" (third sound). This value determines the order that the sounds in'+
           'the stimuli parameter will play.'
       },
-      difficulty: {
+      density: {
         type: jsPsych.plugins.parameterType.FLOAT,
-        pretty_name: 'Difficulty',
+        pretty_name: 'Density',
         default: 1,
         array: false,
-        description: 'Difficulty level (floating point) used for adjusting the task difficulty.'
+        description: 'Density level (floating point) used for adjusting the task density.'
       },
       rove: {
         type: jsPsych.plugins.parameterType.FLOAT,
         pretty_name: 'Rove',
         default: 1,
         array: false,
-        description: 'Rove level (floating point) used for adjusting the task difficulty.'
+        description: 'Rove level (floating point) used for adjusting the task.'
       },
 
       button_html_off: {
@@ -374,7 +374,7 @@ jsPsych.plugins["stripes"] = (function() {
         "rt": response.rt,
         "button_pressed": response.button,
         "accuracy": response.accuracy,
-        "difficulty": trial.difficulty,
+        "density": trial.density,
         "rove": trial.rove,
         "stimuli": trial.stimuli,
         "correct_response": trial.correct_choice
@@ -411,7 +411,7 @@ jsPsych.plugins["stripes"] = (function() {
     }
 
     function get_audio_start_time(diff) {
-      // TO DO: code here to randomly select from a range of times, based on current difficulty
+      // TO DO: code here to randomly select from a range of times, based on current density
       var time = 0; // start time is start of the file
       return time;
     }
@@ -430,8 +430,8 @@ jsPsych.plugins["stripes"] = (function() {
       }
       // create the on_ended function for this stim
       var curr_onended_fn = create_onended_fn(is_target_sound, is_last_stim);
-      // get the audio file start time, based on current difficulty
-      var audio_start_time = get_audio_start_time(trial.difficulty);
+      // get the audio file start time, based on current density
+      var audio_start_time = get_audio_start_time(trial.density);
       // set up and play next audio 
       if (method == "web_audio") {
         source = context.createBufferSource();
