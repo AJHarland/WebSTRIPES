@@ -196,6 +196,7 @@
       loop_function: function() {
         trial_count++;
         
+        
         // TO DO: code here to update any global variables that are used as dynamic parameters in the adaptive trial:
         // - current_audio_files
         // - current_density
@@ -244,6 +245,8 @@
         // TO DO: check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
         // but for now we'll stop based on the number of trials
+        
+
         if (trial_count < 10) {
           // loop over the adaptive trial again
           return true;

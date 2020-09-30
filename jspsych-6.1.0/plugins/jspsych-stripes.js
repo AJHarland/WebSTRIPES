@@ -58,7 +58,7 @@ jsPsych.plugins["stripes"] = (function() {
         pretty_name: 'Density',
         default: 1,
         array: false,
-        description: 'Density level (floating point) used for adjusting the task density.'
+        description: 'Density level (floating point) used for adjusting the stripe density.'
       },
       rove: {
         type: jsPsych.plugins.parameterType.FLOAT,
@@ -201,18 +201,18 @@ jsPsych.plugins["stripes"] = (function() {
     // instead of preloading everything at the start of the experiment.
     // This code might be useful if you need to create a large set of audio files that correspond to difficulty levels,
     // and don't know in advance which specific files you need (e.g. because you're using a staircase procedure).
-    // var page_load_start = performance.now();
-    // var audio_ready = false;
-    // var page_ready = false;
-    // // start loading the audio files (async)
-    // // when finished, change the audio_ready variable to true and start the trial if the page is ready
-    // jsPsych.pluginAPI.preloadAudioFiles(trial.stimuli, change_audio_ready_state);
-    // function change_audio_ready_state() {
-    //   audio_ready = true;
-    //   if (page_ready) {
-    //     start_trial();
-    //   }
-    // }
+    var page_load_start = performance.now();
+    var audio_ready = false;
+    var page_ready = false;
+    // start loading the audio files (async)
+    // when finished, change the audio_ready variable to true and start the trial if the page is ready
+    jsPsych.pluginAPI.preloadAudioFiles(trial.stimuli, change_audio_ready_state);
+    function change_audio_ready_state() {
+      audio_ready = true;
+      if (page_ready) {
+        start_trial();
+      }
+    }
 
     // check parameters and set defaults
     // stimuli array
