@@ -23,19 +23,22 @@
 
     // initialize global variables for the adaptive task
     var trial_count = 0;
-    var current_difficulty = 0;
-    var current_audio_files = ['audio/up_5_0.wav','audio/down_5_0.wav','audio/down_5_1.wav'];
+    var current_density = 5.5; 
+    var max_density = 5.9; //eventually will be 20
+    var min_density = 5.0; //eventually will be 1.1
+    var current_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+    var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
 
     // list all audio/image files for preloading
-    var all_audio_files = ['audio/up_5_0.wav','audio/down_5_0.wav','audio/down_5_1.wav'];
+    var all_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
     var all_image_files = ['img/instructions_screenshot.png'];
 
     // define the trial parameters that are specific to each trial
     // training trial
     var training_trial_info = {
       stimuli: all_audio_files,
-      difficulty: 1,
+      density: 1,
       correct_choice: "A",
       trial_number: 1,
       trial_segment: 'stripes-trial',
@@ -45,7 +48,7 @@
     var pretest_trial_info = [
         {
           stimuli: all_audio_files,
-          difficulty: 1,
+          density: 1,
           correct_choice: "B", 
           trial_number: 1,
           trial_segment: 'stripes-trial',
@@ -53,7 +56,7 @@
         },
         {
           stimuli: all_audio_files,
-          difficulty: 1,
+          density: 1,
           correct_choice: "A", 
           trial_number: 2,
           trial_segment: 'stripes-trial',
@@ -163,20 +166,20 @@
     // adaptive task
     var adaptive_trial = {
       type: 'stripes',
+      stimuli_timing: [1000,1000,1000,1000],
+      choices: ["A","X","B"],
       stimuli: function() {
         return current_audio_files;
       }, 
-      stimuli_timing: [1000,1000,1000,1000],
-      choices: ["A","X","B"],
       correct_choice: function () { 
         return current_correct_choice
       },
-      difficulty: function() {
-        return current_difficulty;
+      density: function() {
+        return current_density;
       },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
       prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.',
-      show_feedback: false,
+      show_feedback: true,
       data: function() {
         // we're using a dynamic parameter here so that we can access the current value of 
         // trial_count and save that value as the 'trial_number' in the data for each trial
@@ -195,27 +198,48 @@
         
         // TO DO: code here to update any global variables that are used as dynamic parameters in the adaptive trial:
         // - current_audio_files
-        // - current_difficulty
+        // - current_density
         // - current_correct_choice
+        // - current_rove
         // eventually this will be done using the jsStaircase library
         
         // randomly select a correct choice for the next trial - either A or B
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
 
-        // update the current difficulty level based on the accuracy of the last response
-        // this parameter doesn't actually do anything in the plugin yet
-        var last_response_acc = jsPsych.data.get().filter({trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'}).last(1).values()[0].accuracy;
-        console.log('response accuracy: ', last_response_acc);
-        if (last_response_acc == true) {
-          current_difficulty++;
-        } else {
-          current_difficulty--;
-        }
+        // randomly select rove values for the next trial
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
 
+        // update the current density level based on the accuracy of the last response
+        // within the limits of the density
+        // this parameter doesn't actually do anything in the plugin yet
+        last_response_acc = jsPsych.data.get().filter({trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'}).last(1).values()[0].accuracy;
+        console.log('response accuracy: ', last_response_acc);
+
+        if (last_response_acc == true) {
+          if (current_density * 10 + 1 > max_density * 10) {
+            current_density = (current_density*10 + 1) / 10;
+          }
+        } else {
+          if (current_density * 10 - 1 < min_density * 10) {
+            current_density = (current_density * 10 -1) / 10;
+          }
+        }
+          
+        current_audio_files = 
+          (function() {
+          var up_audio_file = 'audio/up_'+current_density.toFixed(1)+'_'+current_rove[0]+'.wav';
+          var down_1_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[1]+'.wav';
+          var down_2_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[2]+'.wav';
+          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          })();
+
+        
         // print info about the next trial to the console
         console.log('next trial number: ', trial_count);
         console.log('next correct choice: ', current_correct_choice);
-        console.log('next difficulty: ', current_difficulty);
+        console.log('next density: ', current_density);
+        console.log('next rove', current_rove);
+        console.log('next audio files', current_audio_files);
 
         // TO DO: check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
@@ -228,7 +252,7 @@
           return false;
         }
       }
-    }
+    };
     timeline.push(adaptive_trial_loop);
 
     var show_data = {
