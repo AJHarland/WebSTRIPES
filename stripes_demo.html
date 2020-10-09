@@ -217,11 +217,11 @@
         console.log('response accuracy: ', last_response_acc);
 
         if (last_response_acc == true) {
-          if (current_density * 10 + 1 < max_density * 10) {
+          if (current_density * 10 + 1 <= max_density * 10) {
             current_density = (current_density*10 + 1) / 10;
           }
         } else {
-          if (current_density * 10 - 1 > min_density * 10) {
+          if (current_density * 10 - 1 >= min_density * 10) {
             current_density = (current_density * 10 -1) / 10;
           }
         }
