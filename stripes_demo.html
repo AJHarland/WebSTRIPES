@@ -9,6 +9,7 @@
   <script src="jspsych-6.1.0/plugins/jspsych-stripes.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jspsych-6.1.0/plugins/jsStaircase.js"></script>
   <link rel="stylesheet" href="jspsych-6.1.0/css/jspsych.css" type="text/css"></link>
   <!-- later CSS rules overwrite earlier ones, so load custom CSS *after* jsPsych's default CSS -->
   <link rel="stylesheet" href="css/stripes.css" title="preferred" type="text/css"></link> 
@@ -187,6 +188,20 @@
       }
     };
 
+
+    var stair = new Staircase({
+      deltaDensity:{
+        firstVal: current_density, 
+        down: 2, //how many good answers per bad answer before difficulty changes
+        factor: 0.1,
+        direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
+        limits: [max_density, min_density],
+        operation: 'add',
+        sameStairMax:10,
+      }
+    });
+    
+  stair.init();
     // set up a 'loop node' to repeat the trial procedure 
     // the loop_function runs after each trial to 
     // 1. update any dynamic trial parameters
