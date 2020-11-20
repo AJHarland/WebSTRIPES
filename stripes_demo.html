@@ -193,26 +193,29 @@
       deltaDensity:{
         firstVal: current_density, 
         down: 2, //how many good answers per bad answer before difficulty changes
-        factor: 0.1,
+        stepChangeFactor: 1.001,
+        firstStepSize: 1,
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
         limits: [max_density, min_density],
-        operation: 'add',
         sameStairMax:10,
       }
     });
     
-  stair.init();
+    stair.init();
+
+
     // set up a 'loop node' to repeat the trial procedure 
     // the loop_function runs after each trial to 
     // 1. update any dynamic trial parameters
     // 2. check to see if the loop should stop or continue
+     
     var adaptive_trial_loop = {
       timeline: [adaptive_trial],
       loop_function: function() {
         trial_count++;
+         
         
-        
-        // TO DO: code here to update any global variables that are used as dynamic parameters in the adaptive trial:
+        // update any global variables that are used as dynamic parameters in the adaptive trial:
         // - current_audio_files
         // - current_density
         // - current_correct_choice
@@ -230,7 +233,11 @@
         // this parameter doesn't actually do anything in the plugin yet
         last_response_acc = jsPsych.data.get().filter({trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'}).last(1).values()[0].accuracy;
         console.log('response accuracy: ', last_response_acc);
+        
+        stair.next(last_response_acc)
 
+        stair_density = stair.getActive();
+        /*
         if (last_response_acc == true) {
           if (current_density * 10 + 1 <= max_density * 10) {
             current_density = (current_density*10 + 1) / 10;
@@ -240,12 +247,13 @@
             current_density = (current_density * 10 -1) / 10;
           }
         }
-          
+        */
+
         current_audio_files = 
           (function() {
-          var up_audio_file = 'audio/up_'+current_density.toFixed(1)+'_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/up_'+stair_density.toFixed(1)+'_'+current_rove[0]+'.wav';
+          var down_1_audio_file = 'audio/down_'+stair_density.toFixed(1)+'_'+current_rove[1]+'.wav';
+          var down_2_audio_file = 'audio/down_'+stair_density.toFixed(1)+'_'+current_rove[2]+'.wav';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
@@ -257,20 +265,15 @@
         console.log('next rove', current_rove);
         console.log('next audio files', current_audio_files);
 
-        // TO DO: check to see if the conditions have been met to end the trial loop
+        // check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
         // but for now we'll stop based on the number of trials
-        
+        return stair.limitReached;
 
-        if (trial_count < 10) {
-          // loop over the adaptive trial again
-          return true;
-        } else {
-          // stop the loop when trial_count reaches 10
-          return false;
-        }
-      }
-    };
+      },
+    }; 
+
+      
     timeline.push(adaptive_trial_loop);
 
     var show_data = {
@@ -282,6 +285,7 @@
       },
       choices: ['Next']
     };
+
     timeline.push(show_data);
 
     // run experiment
