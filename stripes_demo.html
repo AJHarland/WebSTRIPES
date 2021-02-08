@@ -6,6 +6,7 @@
   <title>STRIPES demo</title>
   <script src="jspsych-6.1.0/jspsych.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-instructions-hide-first-back.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-audio-button-response.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-stripes.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
   <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
@@ -24,15 +25,15 @@
 
     // initialize global variables for the adaptive task
     var trial_count = 0;
-    var current_density = 5.5; 
-    var max_density = 5.9; //eventually will be 20
-    var min_density = 5.0; //eventually will be 1.1
-    var current_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
+    var current_density = 5; 
+    var max_density = 20.0; 
+    var min_density = 1.1; 
+    var current_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
-    var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
+    var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
 
     // list all audio/image files for preloading
-    var all_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
+    var all_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
     var all_image_files = ['img/instructions_screenshot.png'];
 
     // define the trial parameters that are specific to each trial
@@ -64,6 +65,36 @@
           task_part: 'stripes-pretest'
         },
     ];
+    
+    // volume calibration
+  
+    var audio_calibration_trial = {
+        type: 'audio-button-response',
+        stimulus: 'audio/stripes_u_5.0_0.wav',
+        prompt: "<p>Please adjust the volume on your computer so that the audio is playing at a clear and comfortable level.</p><p>When you are finished, click the 'Done' button.</p>",
+        choices: ['Done'],
+        button_html: "<button class='jspsych-btn'>%choice%</button>", 
+        timing_response: 4000,
+        response_ends_trial: true,
+        trial_ends_after_audio: true,
+        ignore_responses_during_audio: false,
+        post_trial_gap: 0,
+        data: {task_segment: 'audio_calibration'}
+    };
+
+    var audio_calibration_loop = {
+        timeline: [audio_calibration_trial],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].button_pressed === "0") { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+    timeline.push(audio_calibration_loop);
+
 
     // set up instructions and add to the timeline
     var instructions = {
@@ -190,14 +221,15 @@
 
 
     var stair = new Staircase({
-      deltaDensity:{
+      stair_density:{
         firstVal: current_density, 
         down: 2, //how many good answers per bad answer before difficulty changes
-        stepChangeFactor: 1.001,
+        stepChangeFactor: 1,
         firstStepSize: 1,
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
-        limits: [max_density, min_density],
+        limits: [min_density, max_density],
         sameStairMax:10,
+        reversalLimit: 8,
       }
     });
     
@@ -226,7 +258,7 @@
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
 
         // randomly select rove values for the next trial
-        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); // eventually rove will have values 0-10
 
         // update the current density level based on the accuracy of the last response
         // within the limits of the density
@@ -236,24 +268,14 @@
         
         stair.next(last_response_acc)
 
-        stair_density = stair.getActive();
-        /*
-        if (last_response_acc == true) {
-          if (current_density * 10 + 1 <= max_density * 10) {
-            current_density = (current_density*10 + 1) / 10;
-          }
-        } else {
-          if (current_density * 10 - 1 >= min_density * 10) {
-            current_density = (current_density * 10 -1) / 10;
-          }
-        }
-        */
+        density = stair.getActive().val[stair.getActive().val.length-1]
+
 
         current_audio_files = 
           (function() {
-          var up_audio_file = 'audio/up_'+stair_density.toFixed(1)+'_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/down_'+stair_density.toFixed(1)+'_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/down_'+stair_density.toFixed(1)+'_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_'+density.toFixed(1)+'_'+current_rove[0]+'.wav';
+          var down_1_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[1]+'.wav';
+          var down_2_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[2]+'.wav';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
@@ -261,14 +283,14 @@
         // print info about the next trial to the console
         console.log('next trial number: ', trial_count);
         console.log('next correct choice: ', current_correct_choice);
-        console.log('next density: ', current_density);
+        console.log('next density: ', density);
         console.log('next rove', current_rove);
         console.log('next audio files', current_audio_files);
 
         // check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
         // but for now we'll stop based on the number of trials
-        return stair.limitReached;
+        return [stair.getActive().limitReached];
 
       },
     }; 
