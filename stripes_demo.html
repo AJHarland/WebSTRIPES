@@ -40,12 +40,10 @@
     // training trial
     var training_trial_info = {
       stimuli: all_audio_files,
-      density: 1,
-      correct_choice: "A",
-      trial_number: 1,
       trial_segment: 'stripes-trial',
       task_part: 'stripes-training'
     };  
+
     // pretest trial array
     var pretest_trial_info = [
         {
@@ -156,14 +154,13 @@
         trial_count++;
 
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
-
+        // terminate after 6 repeats
         if (trial_count < 6){
           return true
         }
         else{
           return false
         }
-
       }
     };
 
@@ -195,7 +192,7 @@
       correct_choice: jsPsych.timelineVariable('correct_choice'),
       prompt_audio: 'Please listen to the sounds A, X, and B.',
       prompt_response: function() {
-        return 'Select the sound (A or B) that is most<br>different from the other two sounds. ('+jsPsych.timelineVariable('correct_choice',true)+' is correct)'
+        return 'Select the sound (A or B) that is most<br>different from the other two sounds.'
       },
       show_feedback: true,
       data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: jsPsych.timelineVariable('trial_segment'), task_part: jsPsych.timelineVariable('task_part')}
@@ -323,14 +320,17 @@
         // but for now we'll stop based on the number of trials
         var stair_name = stair.getActiveName();
 
-        /* if (stair.reversalLimitReached(stair_name)) {
+         // return true or false for the loop to continue based on whether the stair limit is reached
+        if (stair.reversalLimitReached('stair_density')) {
             // stop this track if reversal limit reached
-            stair.deactivate(stair_name);
-            stair.lock(stair_name);};
-           */ 
-
-        return [stair.getActive().limitReached];
-
+            stair.deactivate('stair_density');
+            stair.lock('stair_density');
+            console.log('reversal limit reached, no other available tracks');
+              return false;
+        }
+        else {
+          return true
+        };
       },
     }; 
 
