@@ -66,15 +66,26 @@
         },
     ];
     
+    // welcome and instructions
+    var welcome_page = {
+      type: 'instructions-hide-first-back',
+      pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test. Please follow the instructions below:</p><br>'+
+        '<p>1. Please connect your cochlear implant to your phone as if you were going to make a phone call or listen to music.</p>'+
+        '<p>2. Set the volume to a low level.</p><br>'+
+        '<p>On the next page you will hear an example sound from the experiment and will be able to adjust your volume again.</p>'+
+        '<p>But it is best to start with a low volume and then increase it slowly.</p></div>'],
+      show_clickable_nav: true,
+    };
+
+    timeline.push(welcome_page);
+
     // volume calibration
-  
     var audio_calibration_trial = {
         type: 'audio-button-response',
-        stimulus: 'audio/stripes_u_5.0_0.wav',
+        stimulus: 'audio/calibration_sound.wav',
         prompt: "<p>Please adjust the volume on your computer so that the audio is playing at a clear and comfortable level.</p><p>When you are finished, click the 'Done' button.</p>",
         choices: ['Done'],
         button_html: "<button class='jspsych-btn'>%choice%</button>", 
-        timing_response: 4000,
         response_ends_trial: true,
         trial_ends_after_audio: true,
         ignore_responses_during_audio: false,
@@ -129,14 +140,34 @@
       stimuli: training_trial_info.stimuli,
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
-      correct_choice: training_trial_info.correct_choice,
+      correct_choice: function() {
+        return current_correct_choice
+      },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
       prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.',
       show_answer: true,
       show_feedback: true,
       data: training_trial_info
     };
-    timeline.push(training_trial);
+    
+    var training_loop = {
+      timeline: [training_trial],
+      loop_function: function(){
+        trial_count++;
+
+        current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+
+        if (trial_count < 6){
+          return true
+        }
+        else{
+          return false
+        }
+
+      }
+    };
+
+    timeline.push(training_loop);
 
     // set up the start pretest message and add to the timeline
     var start_pretest = {
@@ -227,9 +258,10 @@
         stepChangeFactor: 1,
         firstStepSize: 1,
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
+        startingMoveDirection: 'down', // trial only begins once one incorrect response is made
         limits: [min_density, max_density],
-        sameStairMax:10,
-        reversalLimit: 8,
+        reversalLimit: 4,
+        verbosity: 1,
       }
     });
     
@@ -252,7 +284,6 @@
         // - current_density
         // - current_correct_choice
         // - current_rove
-        // eventually this will be done using the jsStaircase library
         
         // randomly select a correct choice for the next trial - either A or B
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
@@ -290,6 +321,14 @@
         // check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
         // but for now we'll stop based on the number of trials
+        var stair_name = stair.getActiveName();
+
+        /* if (stair.reversalLimitReached(stair_name)) {
+            // stop this track if reversal limit reached
+            stair.deactivate(stair_name);
+            stair.lock(stair_name);};
+           */ 
+
         return [stair.getActive().limitReached];
 
       },
