@@ -1,4 +1,4 @@
-// Becky Gilbert
+// Becky Gilbert - edited version by Andrew Harland (final x reversals, 2 step sizes rather than factor)
 // Based on Hadrien Jean's StaircaseJS code: https://github.com/hadrienj/StaircaseJS
 
 function Staircase(stairs) {
@@ -295,7 +295,9 @@ Staircase.prototype.checkSuccessiveResponseThreshold = function(currentStair) {
       }
     }
   } else { // last response was incorrect
-    if (all_trials_starting_difficulty) {
+    if 
+    /* Disabled: this section, when enabled prevents it from getting easier at the beginning of a staircase
+    (all_trials_starting_difficulty) {
       // if this is still the starting difficulty level then we don't want this to count as a reversal
       // so keep the direction as 'down'
       stair.moveDirectionArray.push('down');
@@ -303,8 +305,11 @@ Staircase.prototype.checkSuccessiveResponseThreshold = function(currentStair) {
         console.log('incorrect response, still starting difficulty so up threshold not met');
       }
       return false;
-    } else if (stair.successiveBad>=stair.up) {
-      // move up if we've met the up threshold (and if this isn't still the starting difficulty level)
+    } else if 
+    */
+    (stair.successiveBad>=stair.up) {
+      // move up if we've met the up threshold
+      // currently disabled (see above):(and if this isn't still the starting difficulty level)
       stair.successiveBad = 0;
       stair.moveDirectionArray.push("up");
       if (stair.verbosity>0) {

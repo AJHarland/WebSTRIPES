@@ -33,13 +33,13 @@
     var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
 
     // list all audio/image files for preloading
-    var all_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
+    var initial_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
     var all_image_files = ['img/instructions_screenshot.png'];
 
     // define the trial parameters that are specific to each trial
     // training trial
     var training_trial_info = {
-      stimuli: all_audio_files,
+      stimuli: initial_audio_files,
       trial_segment: 'stripes-trial',
       task_part: 'stripes-training'
     };  
@@ -47,7 +47,7 @@
     // pretest trial array
     var pretest_trial_info = [
         {
-          stimuli: all_audio_files,
+          stimuli: initial_audio_files,
           density: 1,
           correct_choice: "B", 
           trial_number: 1,
@@ -55,7 +55,7 @@
           task_part: 'stripes-pretest'
         },
         {
-          stimuli: all_audio_files,
+          stimuli: initial_audio_files,
           density: 1,
           correct_choice: "A", 
           trial_number: 2,
@@ -255,7 +255,8 @@
         stepChangeFactor: 1,
         firstStepSize: 1,
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
-        startingMoveDirection: 'down', // trial only begins once one incorrect response is made
+        startingMoveDirection: 'up', // trial only begins once one incorrect response is made
+        downStartingDifficulty: 1, // need this to allow first incorrect response to initiate staircase
         limits: [min_density, max_density],
         reversalLimit: 4,
         verbosity: 1,
@@ -352,7 +353,7 @@
     // run experiment
     jsPsych.init({
       timeline: timeline,
-      preload_audio: all_audio_files,
+      preload_audio: initial_audio_files,
       on_finish: function() {
         jatos.submitResultData(jsPsych.data.get().json(), jatos.startNextComponent);
       }
