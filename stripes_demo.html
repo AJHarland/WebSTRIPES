@@ -255,11 +255,11 @@
         stepChangeFactor: 1,
         firstStepSize: 1,
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
-        startingMoveDirection: 'up', // trial only begins once one incorrect response is made
-        downStartingDifficulty: 1, // need this to allow first incorrect response to initiate staircase
+        startingMoveDirection: "none", // used for counting whether first change counts as a reversal
         limits: [min_density, max_density],
         reversalLimit: 4,
         verbosity: 1,
+        maxTrialsAtMinVal: 6, // will trigger reversal after x trials at the minimum difficulty
       }
     });
     
