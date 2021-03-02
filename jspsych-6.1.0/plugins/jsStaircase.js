@@ -32,6 +32,7 @@ function Staircase(stairs) {
     this.stairs[i].limits = stairs[i].limits || false; // difficulty value limits
     this.stairs[i].val = stairs[i].val || [this.stairs[i].firstVal]; // difficulty value
     this.stairs[i].maxTrialsAtMinVal = this.stairs[i].maxTrialsAtMinVal || false; // maximum number of trials at minimum difficulty before triggering reversal. Minimum difficulty is taken from 'limits'.
+    this.stairs[i].maxTrialsAtMaxVal = this.stairs[i].maxTrialsAtMaxVal || false; // maximum number of trials at maximum difficulty before triggering reversal. Maximum difficulty is taken from 'limits'.
     this.stairs[i].active = stairs[i].active || (false); // A random staircase is activated using Staircase.init() so they all start disabled by default.
     this.stairs[i].sameStairMax = stairs[i].sameStairMax || -1; 
     this.stairs[i].limitReached = stairs[i].limitReached || false; 
@@ -43,7 +44,7 @@ function Staircase(stairs) {
     this.stairs[i].sameStairCount = stairs[i].sameStairCount || 0;
     this.stairs[i].trialCount = stairs[i].trialCount || 0;
     this.stairs[i].stepSizeArray = [stairs[i].firstStepSize]; // used internally to track changes in step size 
-    this.stairs[i].currentMoveDirection = stairs[i].startingMoveDirection;
+    // this.stairs[i].currentMoveDirection = stairs[i].startingMoveDirection; - seems redundant
     this.stairs[i].moveDirectionArray = [stairs[i].startingMoveDirection]; // used internally to track direction history
     this.stairs[i].downStartingDifficulty = stairs[i].downStartingDifficulty || stairs[i].down; // N-down at starting difficulty, if different from N-down for the rest of the trials
     this.stairs[i].finalValAvgN = stairs[i].finalValAvgN || -1; // how many reversals to average over, -1 = all
