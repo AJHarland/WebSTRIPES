@@ -164,7 +164,7 @@
       }
     };
 
-    timeline.push(training_loop);
+    // timeline.push(training_loop);
 
     // set up the start pretest message and add to the timeline
     var start_pretest = {
@@ -253,13 +253,15 @@
         firstVal: current_density, 
         down: 2, //how many good answers per bad answer before difficulty changes
         stepChangeFactor: 1,
-        firstStepSize: 1,
+        firstStepSize: 0.5,
+        secondStepSize:0.2,
+        reversalsBeforeStepChange: 2, //will be 4 eventually
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
         startingMoveDirection: "none", // used for counting whether first change counts as a reversal
         limits: [min_density, max_density],
-        reversalLimit: 4,
+        reversalLimit: 6, // will be 10? eventually
         verbosity: 1,
-        maxTrialsAtMinVal: 6, // will trigger reversal after x trials at the minimum difficulty
+        maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
       }
     });
     

@@ -22,6 +22,15 @@ function Staircase(stairs) {
     } else {
       this.stairs[i].firstStepSize = stairs[i].firstStepSize;
     }
+    // addition for a simpler 2 step size task
+    this.stairs[i].secondStepSize = stairs[i].secondStepSize;
+    if (stairs[i].stepChangeFactor != 1 && typeof stairs[i].secondStepSize == "number") {
+      throw new Error("Change stepChangeFactor to 1 or remove secondStepSize for"+i);
+    }
+    if (typeof stairs[i].secondStepSize ==="number") {
+      this.stairs[i].reversalsBeforeStepChange = stairs[i].reversalsBeforeStepChange || 2; // number of reversals at the first step size
+    }
+
     this.stairs[i].stepSizeLimits = stairs[i].stepSizeLimits || [0,1];
     // NOTE: easier is always 'up', even if it is a numerical decrease in val
     this.stairs[i].down = stairs[i].down || 1; // N-down 
@@ -43,7 +52,7 @@ function Staircase(stairs) {
     this.stairs[i].successiveBad = stairs[i].successiveBad || 0;
     this.stairs[i].sameStairCount = stairs[i].sameStairCount || 0;
     this.stairs[i].trialCount = stairs[i].trialCount || 0;
-    this.stairs[i].stepSizeArray = [stairs[i].firstStepSize]; // used internally to track changes in step size 
+    this.stairs[i].stepSizeArray = [stairs[i].firstStepSize]; // used internally to track changes in step size
     // this.stairs[i].currentMoveDirection = stairs[i].startingMoveDirection; - seems redundant
     this.stairs[i].moveDirectionArray = [stairs[i].startingMoveDirection]; // used internally to track direction history
     this.stairs[i].downStartingDifficulty = stairs[i].downStartingDifficulty || stairs[i].down; // N-down at starting difficulty, if different from N-down for the rest of the trials
@@ -73,14 +82,20 @@ function Staircase(stairs) {
 
       var curr_step_size = stair.stepSizeArray[stair.stepSizeArray.length-1];
       var new_step_size = curr_step_size;
+      var max_trials_at_max_val_reached;
       // if is reversal, change step size and check step size limits, otherwise step size is the same
       if (is_reversal) {
-        new_step_size = curr_step_size * stair.stepChangeFactor;
+        if (typeof stair.secondStepSize === "number" && stair.reversals == stair.reversalsBeforeStepChange){
+          new_step_size = stair.secondStepSize;
+        } else {
+          new_step_size = curr_step_size * stair.stepChangeFactor;
+        }
         stair.stepSizeArray.push(new_step_size);
         sc.checkStepSizeLimits(stair);
         if (stair.verbosity>0) {
-          console.log('new step size: ', stair.stepSizeArray[stair.stepSizeArray.length - 1]);
+        console.log('new step size: ', stair.stepSizeArray[stair.stepSizeArray.length - 1]);
         }
+        
         // check to see if the reversal occurred because we hit the maxTrialsAtMaxVal limit, 
         // if so, then the difficulty should move in the other direction! (harder instead of easier)
         // 'moveDirectionArray' for next trial was set in the 'checkForReversal' function
@@ -100,18 +115,18 @@ function Staircase(stairs) {
       if (met_threshold) {
         // change difficulty value
         if (!max_trials_at_max_val_reached) {
-          // task should get easier
+          // task should get easier 
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
-          } else { // higher values = easier, lower values = harder
             diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+          } else { // higher values = easier, lower values = harder
+            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         } else {
-          // task should get harder (go up because max trials at min difficulty value has been reached)
+          // task should get harder (go down because max trials at max stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
-          } else { // higher values = easier, lower values = harder
             diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+          } else { // higher values = easier, lower values = harder
+            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         }
         if (stair.verbosity>0) {
@@ -147,12 +162,17 @@ function Staircase(stairs) {
       var max_trials_at_min_val_reached = false;
       // if is reversal, change step size and check step size limits, otherwise step size is the same
       if (is_reversal) {
-        new_step_size = curr_step_size * stair.stepChangeFactor;
+        if (typeof stair.secondStepSize === "number" && stair.reversals == stair.reversalsBeforeStepChange){
+          new_step_size = stair.secondStepSize;
+        } else {
+          new_step_size = curr_step_size * stair.stepChangeFactor;
+        }
         stair.stepSizeArray.push(new_step_size);
         sc.checkStepSizeLimits(stair);
         if (stair.verbosity>0) {
           console.log('new step size: ', stair.stepSizeArray[stair.stepSizeArray.length - 1]);
         }
+        
         // check to see if the reversal occurred because we hit the maxTrialsAtMinVal limit, 
         // if so, then the difficulty should move in the other direction! (easier instead of harder)
         // 'moveDirectionArray' for next trial was set in the 'checkForReversal' function
@@ -178,7 +198,7 @@ function Staircase(stairs) {
             diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         } else {
-          // task should get easier (go up because max trials at min difficulty value has been reached)
+          // task should get easier (go up because max trials at min stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
             diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           } else { // higher values = easier, lower values = harder
@@ -238,7 +258,7 @@ Staircase.prototype.checkStepSizeLimits = function(currentStair) {
     }
   }
 };
-Staircase.prototype.checkForReversal = function(currentStair) {  
+Staircase.prototype.checkForReversal = function(currentStair) {
   // moveDirectionArray has already been updated with the direction for the next trial when this function is called
   // so this compares the current trial direction with the next one
   var stair = currentStair;
@@ -271,7 +291,8 @@ Staircase.prototype.checkForReversal = function(currentStair) {
       if (stair.verbosity>0) {
         console.log('reversal '+stair.reversals+'; max trials at min difficulty');
       }
-      return true;
+    }
+    return true;
   } else if (stair.maxTrialsAtMaxVal && stair.moveDirectionArray[stair.trialCount] == "up") {
     // if 'maxTrialsAtMaxVal' is set and the next trial direction is 'up', then check whether we've hit the maxTrialsAtMaxVal threshold for a reversal 
     var last_n_vals = stair.val.slice(-stair.maxTrialsAtMaxVal);
@@ -284,8 +305,9 @@ Staircase.prototype.checkForReversal = function(currentStair) {
       if (stair.verbosity>0) {
         console.log('reversal '+stair.reversals+'; max trials at max difficulty');
       }
-      return true;
-  } else {
+    }
+    return true;
+  }else {
     stair.isReversal.push(false);
     return false;
   }
