@@ -28,9 +28,16 @@
     var current_density = 5; 
     var max_density = 20.0; 
     var min_density = 1.1; 
-    var current_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
+    
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
     var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
+    var current_audio_files = 
+          (function() {
+          var up_audio_file = 'audio/stripes_u_5.0_'+current_rove[0]+'.wav';
+          var down_1_audio_file = 'audio/stripes_d_5.0'+current_rove[1]+'.wav';
+          var down_2_audio_file = 'audio/stripes_d_5.0'+current_rove[2]+'.wav';
+          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          })();
 
     // list all audio/image files for preloading
     var initial_audio_files = ['audio/stripes_u_5.0_0.wav','audio/stripes_d_5.0_0.wav','audio/stripes_d_5.0_1.wav'];
@@ -44,25 +51,6 @@
       task_part: 'stripes-training'
     };  
 
-    // pretest trial array
-    var pretest_trial_info = [
-        {
-          stimuli: initial_audio_files,
-          density: 1,
-          correct_choice: "B", 
-          trial_number: 1,
-          trial_segment: 'stripes-trial',
-          task_part: 'stripes-pretest'
-        },
-        {
-          stimuli: initial_audio_files,
-          density: 1,
-          correct_choice: "A", 
-          trial_number: 2,
-          trial_segment: 'stripes-trial',
-          task_part: 'stripes-pretest'
-        },
-    ];
     
     // welcome and instructions
     var welcome_page = {
@@ -86,11 +74,12 @@
         button_html: "<button class='jspsych-btn'>%choice%</button>", 
         response_ends_trial: true,
         trial_ends_after_audio: true,
-        ignore_responses_during_audio: false,
+        ignore_responses_during_audio: false, // allows button to be pressed anytime - as it instantly loops when audio ends
         post_trial_gap: 0,
         data: {task_segment: 'audio_calibration'}
     };
 
+    // loop volume calibration until 'next' is pressed
     var audio_calibration_loop = {
         timeline: [audio_calibration_trial],
         loop_function: function(data) {
@@ -157,14 +146,13 @@
         // terminate after 6 repeats
         if (trial_count < 6){
           return true
-        }
-        else{
+        } else {
           return false
         }
       }
     };
 
-    // timeline.push(training_loop);
+    //timeline.push(training_loop);
 
     // set up the start pretest message and add to the timeline
     var start_pretest = {
@@ -184,26 +172,68 @@
     timeline.push(fixation);
 
     // set up pretest trials using the values from pretest_trial_info and add to the timeline
-    var pretest_trial = {
+    var no_feedback_trial = {
       type: 'stripes',
-      stimuli: jsPsych.timelineVariable('stimuli'), 
+      stimuli: initial_audio_files, 
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
-      correct_choice: jsPsych.timelineVariable('correct_choice'),
+      correct_choice: function() {
+        return current_correct_choice
+      },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
       prompt_response: function() {
         return 'Select the sound (A or B) that is most<br>different from the other two sounds.'
       },
       show_feedback: true,
-      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: jsPsych.timelineVariable('trial_segment'), task_part: jsPsych.timelineVariable('task_part')}
+      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: 'no-feedback-training', task_part: 'stripes-training'}
     };
 
-    var pretest_trial_procedure = {
-      timeline: [pretest_trial],
+    /* var pretest_trial_procedure = {
+      timeline: [nofeedback_trial],
       timeline_variables: pretest_trial_info,
       randomize_order: true
+    }; 
+    timeline.push(pretest_trial_procedure); */
+
+    var pretest_loop = {
+      timeline: [no_feedback_trial],
+      loop_function: function(){
+        trial_count++;
+        console.log('trial count:', trial_count);
+        var last_trial = jsPsych.data.get().last().values()[0].accuracy;
+          console.log('last trial correct?:', last_trial);
+        // update global variable for looping
+        current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+        
+        // Check if 4/5 answers are correct, if not present another 5 trials, up to 20 trials total
+         
+        //Repeat if not a multiple of 5 and less than 21 trials done
+        if (!Number.isInteger(trial_count/5) && trial_count < 20){
+          return true
+        } else {
+          // check if last 4/5 are correct
+          var last_five_acc = jsPsych.data.get().last(5).filter({accuracy: true}).count();
+          console.log('Correct out of last five: ', last_five_acc);
+          
+          if (last_five_acc > 3){
+            // if correct end loop
+            easier_version = false;
+            console.log("continue to adaptive task")
+            return false
+          } else if (trial_count < 16){
+            // if incorrect loop again till next 5
+            return true
+          } else {
+          // if they've done 20 trials without getting 4 in a row, end loop and pass a global variable to make them do the easy task 
+            easier_version = true;
+            console.log("Do easier version");
+            return false
+          }           
+        }
+      }
     };
-    timeline.push(pretest_trial_procedure);
+
+    timeline.push(pretest_loop);
 
     // set up the start adaptive message and add to the timeline
     var start_adaptive = {
@@ -262,6 +292,7 @@
         reversalLimit: 6, // will be 10? eventually
         verbosity: 1,
         maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
+        maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the minimum difficulty
       }
     });
     
