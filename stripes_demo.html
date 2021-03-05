@@ -48,7 +48,7 @@
     var training_trial_info = {
       stimuli: initial_audio_files,
       trial_segment: 'stripes-trial',
-      task_part: 'stripes-training'
+      task_part: 'training-with-answers'
     };  
 
     
@@ -122,7 +122,7 @@
     timeline.push(fixation);
 
     // set up a STRIPES training trial using the values from training_trial_info and add it to the timeline
-    var training_trial = {
+    var training_with_answers = {
       type: 'stripes',
       stimuli: training_trial_info.stimuli,
       stimuli_timing: [1000,1000,1000,1000],
@@ -138,7 +138,7 @@
     };
     
     var training_loop = {
-      timeline: [training_trial],
+      timeline: [training_with_answers],
       loop_function: function(){
         trial_count++;
 
@@ -172,7 +172,7 @@
     timeline.push(fixation);
 
     // set up pretest trials using the values from pretest_trial_info and add to the timeline
-    var no_feedback_trial = {
+    var pre_test_screening = {
       type: 'stripes',
       stimuli: initial_audio_files, 
       stimuli_timing: [1000,1000,1000,1000],
@@ -185,7 +185,7 @@
         return 'Select the sound (A or B) that is most<br>different from the other two sounds.'
       },
       show_feedback: true,
-      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: 'no-feedback-training', task_part: 'stripes-training'}
+      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: 'pre-test-screening', task_part: 'stripes-training'}
     };
 
     /* var pretest_trial_procedure = {
@@ -196,12 +196,9 @@
     timeline.push(pretest_trial_procedure); */
 
     var pretest_loop = {
-      timeline: [no_feedback_trial],
+      timeline: [pre_test_screening],
       loop_function: function(){
         trial_count++;
-        console.log('trial count:', trial_count);
-        var last_trial = jsPsych.data.get().last().values()[0].accuracy;
-          console.log('last trial correct?:', last_trial);
         // update global variable for looping
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
         
@@ -218,7 +215,7 @@
           if (last_five_acc > 3){
             // if correct end loop
             easier_version = false;
-            console.log("continue to adaptive task")
+            console.log("Continue to adaptive task")
             return false
           } else if (trial_count < 16){
             // if incorrect loop again till next 5
@@ -242,8 +239,7 @@
         var pretest_trials = jsPsych.data.get().filter({task_part: 'stripes-pretest'});
         var pretest_total = pretest_trials.count();
         var pretest_correct = pretest_trials.filter({accuracy: true}).count();
-        var text = '<div class="instructions-text"><p>You got '+pretest_correct.toString()+'/'+pretest_total.toString()+' correct.</p>'+
-          '<p>You will now start the adaptive test.</p><p>You will no longer see feedback about your responses.</p>'+
+        var text = '<div class="instructions-text"><p>Training complete, you will now begin the main part of the experiment</p>'+
           '<p>Please click Next to start</p></div>';
         return [text];
       },
