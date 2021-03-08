@@ -53,6 +53,7 @@ jsPsych.plugins["stripes"] = (function() {
         description: 'The correct response on this trial, either "A" (first sound) or "B" (third sound). This value determines the order that the sounds in'+
           'the stimuli parameter will play.'
       },
+      /* ended up implementing them outside the plugin - redundant 
       density: {
         type: jsPsych.plugins.parameterType.FLOAT,
         pretty_name: 'Density',
@@ -66,7 +67,7 @@ jsPsych.plugins["stripes"] = (function() {
         default: 1,
         array: false,
         description: 'Rove level (floating point) used for adjusting the task.'
-      },
+      }, */
 
       button_html_off: {
         type: jsPsych.plugins.parameterType.HTML_STRING,
