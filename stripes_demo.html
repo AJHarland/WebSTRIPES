@@ -60,8 +60,8 @@
     // training trial
     var training_trial_info = {
       stimuli: current_audio_files,
-      trial_segment: 'stripes-trial',
-      task_part: 'training-with-answers'
+      trial_segment: 'training-with-answers',
+      task_part: 'stripes-training'
     };  
     
     // welcome and instructions
@@ -365,7 +365,7 @@
       data: function() {
         // we're using a dynamic parameter here so that we can access the current value of 
         // trial_count and save that value as the 'trial_number' in the data for each trial
-        return {trial_number: trial_count, trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'};
+        return {trial_number: adaptive_trial_count, trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'};
       }
     };
 
@@ -381,7 +381,7 @@
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
         startingMoveDirection: "none", // used for counting whether first change counts as a reversal
         limits: [min_density, max_density],
-        reversalLimit: 6, // will be 10? eventually
+        reversalLimit: 6, // will be 10 eventually
         verbosity: 1,
         maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
         maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the minimum difficulty
