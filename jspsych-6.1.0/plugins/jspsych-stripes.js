@@ -151,7 +151,7 @@ jsPsych.plugins["stripes"] = (function() {
       answer_incorrect_style: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Answer incorrect style',
-        default: 'background-color: rgb(255,90,90);',
+        default: 'background-color: rgb(187,187,187);', // red is (255,90,90), dark grey is (133,133,133)
         description: 'If show_answer is true, this is the CSS style that will be used for the incorrect choice button (A or B).'
       },
       show_feedback: {
