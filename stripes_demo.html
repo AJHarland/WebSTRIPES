@@ -137,7 +137,9 @@
     // set up a STRIPES training trial using the values from training_trial_info and add it to the timeline
     var training_with_answers = {
       type: 'stripes',
-      stimuli: training_trial_info.stimuli,
+      stimuli: function(){
+        return current_audio_files
+      },
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
       correct_choice: function() {
@@ -166,7 +168,7 @@
           })();
 
         if (verbosity == 1){
-          console.log('trials completed: ',n_training_trials)
+          console.log('trials completed: ',n_training_trials - 1)
           console.log('next audio files: ',current_audio_files)
         };
 
@@ -201,7 +203,9 @@
     // set up pretest trials 
     var pre_test_screening = {
       type: 'stripes',
-      stimuli: current_audio_files, 
+      stimuli: function() {
+        return current_audio_files;
+      }, 
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
       correct_choice: function() {
