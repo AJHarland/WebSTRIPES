@@ -102,7 +102,7 @@
 
 
     // set up instructions and add to the timeline
-    var instructions = {
+    var training_instructions = {
       type: 'instructions-hide-first-back',
       pages: ['<div class="instructions-text"><p>In each trial, your task is to select the odd one out of three sounds.</p>'+
         '<p>Each sound has noisy static at the beginning and end of it.</p>'+
@@ -110,13 +110,15 @@
         '<p>After all three sounds have played, tap on the odd one out, either A or B.<p></div>',
         '<div class="instructions-text"><p>Here is what the screen will look like:</p>'+
         '<img src="'+all_image_files[0]+'" style="width:90%;">'+
-        '<p>When you press Next, you will have a chance to try it.</p></div>'
+        '<p>When you press Next, you will have a chance to try it six times.</p>'+
+        '<p>As they are training examples, we have highlighted the correct answer in blue.</p>'+
+        '<p>Try to familiarise yourself to the sounds and listen carefully to the difference.</p></div>'
       ],
       show_clickable_nav: true,
       button_label_previous: 'Back',
       data: {task_part: "instructions"}
     }
-    timeline.push(instructions);
+    timeline.push(training_instructions);
 
     // set up fixation and add to the timeline
     var fixation = {
@@ -140,7 +142,7 @@
         return current_correct_choice
       },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
-      prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.',
+      prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.<br> Correct answer is highlighted blue.',
       show_answer: true,
       show_feedback: true,
       data: training_trial_info
@@ -376,11 +378,11 @@
         stepChangeFactor: 1,
         firstStepSize: 0.5,
         secondStepSize:0.2,
-        reversalsBeforeStepChange: 2, //will be 4 eventually
+        reversalsBeforeStepChange: 4, //will be 4 eventually
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
         startingMoveDirection: "none", // used for counting whether first change counts as a reversal
         limits: [min_density, max_density],
-        reversalLimit: 6, // will be 10 eventually
+        reversalLimit: 8, // will be 10 eventually
         verbosity: 1,
         maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
         maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the minimum difficulty
@@ -484,28 +486,18 @@
       }
     }
     timeline.push(run_adaptive);
-    
-    /* 
-    // this one doesn't work - perhaps because the if decision is made before any timeline events occur
-    if (easier_version){
-      timeline.push(easy_loop)
-    } else {
-      timeline.push(adaptive_trial_loop)
-    }; 
-    */
-    
 
-    var show_data = {
-      type: 'html-button-response',
-      stimulus: function() {
-        var html = '<p>Below is the data that has been recorded from this session.</p><p>Click the next button at the bottom of the page to end the experiment.</p>';
-        html += '<pre id="jspsych-data-display">'+jsPsych.data.get().json(true)+'</pre>';
-        return html;
-      },
-      choices: ['Next']
-    };
+    var thank_you_page = {
+      type: 'instructions-hide-first-back',
+      pages: ['<div class="instructions-text"><p>Well done!</p><p>Thank you for participating in our experiment.</p>'+
+        '<p>Please press "Next" to finish.</p></div>'
+      ],
+      show_clickable_nav: true,
+      button_label_previous: 'Back',
+      data: {task_part: "instructions"}
+    }
+    timeline.push(thank_you_page);
 
-    timeline.push(show_data);
 
     // run experiment
     jsPsych.init({
