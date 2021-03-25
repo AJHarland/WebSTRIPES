@@ -30,13 +30,12 @@
     var n_pretest_trials = 0;
     var easy_trial_count = 0;
 
-
-      // global variables for the adaptive task
+    // global variables for the adaptive task
     var adaptive_trial_count = 0;
     var current_density = 1.1; 
     var max_density = 20.0; 
     var min_density = 1.1; 
-    
+
      // global variables for the training tasks (adaptive tasks uses current_audio_files too)
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
     var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
@@ -111,7 +110,7 @@
         '<div class="instructions-text"><p>Here is what the screen will look like:</p>'+
         '<img src="'+all_image_files[0]+'" style="width:90%;">'+
         '<p>When you press Next, you will have a chance to try it six times.</p>'+
-        '<p>As they are training examples, we have highlighted the correct answer in blue.</p>'+
+        '<p>As they are training examples, we have highlighted the correct answer in green.</p>'+
         '<p>Try to familiarise yourself to the sounds and listen carefully to the difference.</p></div>'
       ],
       show_clickable_nav: true,
@@ -142,7 +141,7 @@
         return current_correct_choice
       },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
-      prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.<br> Correct answer is highlighted blue.',
+      prompt_response: 'Select the odd one out.<br> Correct answer is highlighted green.',
       show_answer: true,
       show_feedback: true,
       data: training_trial_info
@@ -208,9 +207,7 @@
         return current_correct_choice
       },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
-      prompt_response: function() {
-        return 'Select the sound (A or B) that is most<br>different from the other two sounds.'
-      },
+      prompt_response:'Select the odd one out.',
       show_feedback: true,
       data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: 'screening', task_part: 'pre-test-screening'}
     };
@@ -333,7 +330,7 @@
         
         if (verbosity == 1){
           console.log('trials completed: ', easy_trial_count)
-          console.log('next audio files: ', easy_audio_files)
+          console.log('next audio files: ', current_audio_files)
         }
 
         //Repeat if less than 30 trials done
