@@ -40,9 +40,9 @@
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
     var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
     var current_audio_files = (function() {
-          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();      
 
@@ -74,7 +74,7 @@
     // volume calibration
     var audio_calibration_trial = {
         type: 'audio-button-response',
-        stimulus: 'audio/calibration_sound.wav',
+        stimulus: 'audio/calibration_sound.mp3',
         prompt: "<div class='instructions-text'><p>Please adjust the volume on your computer so that the audio is playing at a clear and comfortable level.</p><p>When you are finished, click the 'Done' button.</p></div>",
         choices: ['Done'],
         button_html: "<button class='jspsych-btn'>%choice%</button>", 
@@ -156,9 +156,9 @@
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
         current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
         current_audio_files = (function() {
-          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
@@ -221,9 +221,9 @@
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
         current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3);
         current_audio_files = (function() {
-          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
         // Check if 4/5 answers are correct, if not present another 5 trials, up to 20 trials total
@@ -322,9 +322,9 @@
 
         current_audio_files = 
         (function() {
-        var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.wav';
-        var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.wav';
-        var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.wav';
+        var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+        var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+        var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
         return [up_audio_file, down_1_audio_file, down_2_audio_file];
         })();
         
@@ -425,9 +425,9 @@
 
         current_audio_files = 
           (function() {
-          var up_audio_file = 'audio/stripes_u_'+density.toFixed(1)+'_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_'+density.toFixed(1)+'_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
