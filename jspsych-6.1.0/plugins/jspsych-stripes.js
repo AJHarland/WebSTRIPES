@@ -211,6 +211,7 @@ jsPsych.plugins["stripes"] = (function() {
     function change_audio_ready_state() {
       audio_ready = true;
       if (page_ready) {
+        console.log('page ready')
         start_trial();
       }
     }
@@ -533,18 +534,20 @@ jsPsych.plugins["stripes"] = (function() {
     // The commented-out code below is useful if you need to load the audio at the start of each trial 
     // (instead of preloading at the start of the experiment)
     // because it will check that the page and audio files are ready before starting the trial
-    page_ready = true;
+    /*page_ready = true;
      if (audio_ready) {
+       console.log('audio ready starting trial')
        start_trial();
      } else {
        // try again?
-       console.log('page loaded, audio not ready, attempting to load audio again');
-    jsPsych.pluginAPI.preloadAudioFiles(trial.stimuli, change_audio_ready_state);
+       console.log('page loaded, audio not ready');
+    //jsPsych.pluginAPI.preloadAudioFiles(trial.stimuli, change_audio_ready_state);
      }
-
+    */
+   
     // if we're preloading the audio files then we can just start the trial immediately,
     // instead of checking that the page and audio files are ready.
-    // start_trial();
+    start_trial();
 
   };
 
