@@ -207,6 +207,7 @@ jsPsych.plugins["stripes"] = (function() {
     var page_ready = false;
     // start loading the audio files (async)
     // when finished, change the audio_ready variable to true and start the trial if the page is ready
+    /*
     jsPsych.pluginAPI.preloadAudioFiles(trial.stimuli, change_audio_ready_state);
     function change_audio_ready_state() {
       audio_ready = true;
@@ -215,7 +216,7 @@ jsPsych.plugins["stripes"] = (function() {
         start_trial();
       }
     }
-
+    */
     // check parameters and set defaults
     // stimuli array
     if (trial.stimuli.length !== 3) {
