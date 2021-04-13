@@ -69,14 +69,14 @@
 
     timeline.push(welcome_page1);
 
-    // preload audio
+    // preload calibration audio and image files
     var preload = {
     type: 'preload',
     images: all_image_files,
-    audio: all_audio_files,
+    audio: ['audio/calibration_sound.wav'], //all_audio_files,
   };
 
-  // timeline.push(preload);
+   timeline.push(preload);
 
 
     // define the trial parameters that are specific to each trial
@@ -159,6 +159,16 @@
     }
     timeline.push(fixation);
 
+    // preload audio for stripes trial - this can be used immediately before any stripes trial,
+    // as long as the to-be-loaded audio is stored in the 'current_audio_files' variable
+    var stripes_preload = {
+      type: 'preload',
+      audio: function() {
+        return current_audio_files;
+      },
+      show_progress_bar: false
+    };
+
     // set up a STRIPES training trial using the values from training_trial_info and add it to the timeline
     var training_with_answers = {
       type: 'stripes',
@@ -178,7 +188,7 @@
     };
     
     var training_loop = {
-      timeline: [training_with_answers],
+      timeline: [stripes_preload, training_with_answers],
       loop_function: function(){
         n_training_trials++;
 
@@ -244,7 +254,7 @@
     
     // loop the pretest trials
     var pretest_loop = {
-      timeline: [pre_test_screening],
+      timeline: [stripes_preload, pre_test_screening],
       loop_function: function(){
         n_pretest_trials++;
         // update global variable for looping
@@ -342,7 +352,7 @@
 
     // loop the easy trial
     var easy_loop = {
-      timeline: [easy_trial],
+      timeline: [stripes_preload, easy_trial],
       loop_function: function(){
         easy_trial_count++;
         // update global variable for looping
@@ -425,7 +435,7 @@
     // 2. check to see if the loop should stop or continue
      
     var adaptive_trial_loop = {
-      timeline: [adaptive_trial],
+      timeline: [stripes_preload, adaptive_trial],
       loop_function: function() {
         adaptive_trial_count++;
          

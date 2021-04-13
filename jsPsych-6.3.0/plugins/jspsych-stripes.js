@@ -436,22 +436,30 @@ jsPsych.plugins["stripes"] = (function() {
       // get the audio file start time, based on current density
       var audio_start_time = get_audio_start_time(trial.density);
       // set up and play next audio 
-      if (method == "web_audio") {
-        source = context.createBufferSource();
-        source.buffer = jsPsych.pluginAPI.getAudioBuffer(audio_array[audio_count]);
-        source.connect(context.destination);
-        source.onended = curr_onended_fn;
-        startTime = context.audio_start_time;
-        source.start(startTime);
-      } else { // HTML audio
-        audio = jsPsych.pluginAPI.getAudioBuffer(audio_array[audio_count]);
-        audio.currentTime = audio_start_time;
-        audio.addEventListener('ended', curr_onended_fn);
-        audio.play();
-      }
-      // change to the 'audio on' button HTML when sound starts playing
-      change_button_to_audio_on(audio_count);
-      audio_count++;
+      jsPsych.pluginAPI.getAudioBuffer(audio_array[audio_count])
+      .then(function(buffer) {
+        if (method == "web_audio") {
+          source = context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(context.destination);
+          source.onended = curr_onended_fn;
+          startTime = context.audio_start_time;
+          source.start(startTime);
+        } else { // HTML audio
+          audio = buffer;
+          audio.currentTime = audio_start_time;
+          audio.addEventListener('ended', curr_onended_fn);
+          audio.play();
+        }
+        // change to the 'audio on' button HTML when sound starts playing
+        change_button_to_audio_on(audio_count);
+        audio_count++;
+      })
+      .catch(function(err) {
+        console.error(`Failed to load audio file "${audio_array[audio_count]}".`)
+        console.error(err)
+      })
+     
     }
 
     // function to enable the target (A and B) buttons for response and add the response prompt to the screen
