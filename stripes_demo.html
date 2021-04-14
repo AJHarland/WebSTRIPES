@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="user-scalable=0"> 
   <title>STRIPES demo</title>
-  <script src="jspsych-6.1.0/jspsych.js"></script>
-  <script src="jspsych-6.1.0/plugins/jspsych-instructions-hide-first-back.js"></script>
-  <script src="jspsych-6.1.0/plugins/jspsych-stripes.js"></script>
-  <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
-  <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
-  <link rel="stylesheet" href="jspsych-6.1.0/css/jspsych.css" type="text/css"></link>
+  <script src="jspsych-6.3.0/jspsych.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-instructions.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-audio-button-response.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-stripes.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-html-button-response.js"></script>
+  <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jspsych-6.3.0/plugins/jsStaircase.js"></script>
+  <link rel="stylesheet" href="jspsych-6.3.0/css/jspsych.css" type="text/css"></link>
   <!-- later CSS rules overwrite earlier ones, so load custom CSS *after* jsPsych's default CSS -->
   <link rel="stylesheet" href="css/stripes.css" title="preferred" type="text/css"></link> 
   <script src="jatos.js"></script>
@@ -21,65 +24,126 @@
     // initialize an empty timeline array
     var timeline = [];
 
-    // initialize global variables for the adaptive task
-    var trial_count = 0;
-    var current_density = 5.5; 
-    var max_density = 5.9; //eventually will be 20
-    var min_density = 5.0; //eventually will be 1.1
-    var current_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
-    var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
-    var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
+    // initialise global variables
+    var verbosity = 1;
+    var easier_version = false;
+    var n_training_trials = 0;
+    var n_pretest_trials = 0;
+    var easy_trial_count = 0;
 
-    // list all audio/image files for preloading
-    var all_audio_files = ['audio/up_5.5_0.wav','audio/down_5.5_0.wav','audio/down_5.5_1.wav'];
+    // global variables for the adaptive task
+    var adaptive_trial_count = 0;
+    var current_density = 1.1; 
+    var max_density = 20.0; 
+    var min_density = 1.1; 
+
+     // global variables for the training tasks (adaptive tasks uses current_audio_files too)
+    var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+    var current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
+    var current_audio_files = (function() {
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
+          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          })();      
+
+    // list image files for preloading
     var all_image_files = ['img/instructions_screenshot.png'];
+    
+   // welcome and instructions
+   var welcome_page1 = {
+      type: 'instructions',
+      pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
+        '<p>When you click next, the experiment will start loading the files it needs, this can take a couple of minutes.</p>'+
+        '<p>Please ensure you have a good wifi signal and are not using your mobile data.</p>'+
+        '<p>After 5 mins, if you cannot see a loading bar or if it does not seem to be progressing, </p>'+
+        '<p>please close your internet browser tab and try again. Hitting refresh will not work</p>'
+        ],
+      show_clickable_nav: true,
+      allow_backward: false,
+    };
+
+    timeline.push(welcome_page1);
+
+    // preload calibration audio and image files
+    var preload = {
+    type: 'preload',
+    images: all_image_files,
+    audio: ['audio/calibration_sound.wav'], //all_audio_files,
+  };
+
+   timeline.push(preload);
+
 
     // define the trial parameters that are specific to each trial
     // training trial
     var training_trial_info = {
-      stimuli: all_audio_files,
-      density: 1,
-      correct_choice: "A",
-      trial_number: 1,
-      trial_segment: 'stripes-trial',
+      stimuli: current_audio_files,
+      trial_segment: 'training-with-answers',
       task_part: 'stripes-training'
     };  
-    // pretest trial array
-    var pretest_trial_info = [
-        {
-          stimuli: all_audio_files,
-          density: 1,
-          correct_choice: "B", 
-          trial_number: 1,
-          trial_segment: 'stripes-trial',
-          task_part: 'stripes-pretest'
-        },
-        {
-          stimuli: all_audio_files,
-          density: 1,
-          correct_choice: "A", 
-          trial_number: 2,
-          trial_segment: 'stripes-trial',
-          task_part: 'stripes-pretest'
-        },
-    ];
+    
+    // welcome and instructions
+    var welcome_page_2 = {
+      type: 'instructions',
+      pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
+        '<p>1. Please connect your cochlear implant to your phone as if you were going to make a phone call or listen to music.</p>'+
+        '<p>2. Set the volume to a low level.</p>'+
+        '<p>3. If you are using a phone, please turn it on its side and enable auto-rotate in your phone settings</p><br>'+
+        '<p>On the next page you will hear an example sound from the experiment and will be able to adjust your volume again.</p>'+
+        '<p>But it is best to start with a low volume and then increase it slowly.</p></div>'],
+      show_clickable_nav: true,
+      allow_backward: false,
+    };
+
+    timeline.push(welcome_page_2);
+
+    // volume calibration
+    var audio_calibration_trial = {
+        type: 'audio-button-response',
+        stimulus: 'audio/calibration_sound.wav',
+        prompt: "<div class='instructions-text'><p>Please adjust the volume on your computer so that the audio is playing at a clear and comfortable level.</p><p>When you are finished, click the 'Done' button.</p></div>",
+        choices: ['Done'],
+        button_html: "<button class='jspsych-btn'>%choice%</button>", 
+        response_ends_trial: true,
+        trial_ends_after_audio: true,
+        response_allowed_while_playing: true, // allows button to be pressed anytime - as it instantly loops when audio ends
+        data: {task_segment: 'audio_calibration'}
+    };
+
+    // loop volume calibration until 'next' is pressed
+    var audio_calibration_loop = {
+        timeline: [audio_calibration_trial],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].response === 0) { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+    timeline.push(audio_calibration_loop);
+
 
     // set up instructions and add to the timeline
-    var instructions = {
-      type: 'instructions-hide-first-back',
+    var training_instructions = {
+      type: 'instructions',
       pages: ['<div class="instructions-text"><p>In each trial, your task is to select the odd one out of three sounds.</p>'+
         '<p>Each sound has noisy static at the beginning and end of it.</p>'+
         '<p>The odd one out will be the first (labelled “A”) or last (labelled “B”) sound.</p>'+
         '<p>After all three sounds have played, tap on the odd one out, either A or B.<p></div>',
         '<div class="instructions-text"><p>Here is what the screen will look like:</p>'+
         '<img src="'+all_image_files[0]+'" style="width:90%;">'+
-        '<p>When you press Next, you will have a chance to try it.</p></div>'
+        '<p>When you press Next, you will have a chance to try it six times.</p>'+
+        '<p>As they are training examples, we have highlighted the correct answer in green.</p>'+
+        '<p>Try to familiarise yourself to the sounds and listen carefully to the difference.</p></div>'
       ],
       show_clickable_nav: true,
       button_label_previous: 'Back',
       data: {task_part: "instructions"}
     }
-    timeline.push(instructions);
+    timeline.push(training_instructions);
 
     // set up fixation and add to the timeline
     var fixation = {
@@ -87,28 +151,72 @@
       stimulus: '<span style="font-size:50px;">+</span>',
       choices: jsPsych.NO_KEYS,
       trial_duration: 500,
-      data: {trial_segment: "fixation", task_part: "stripes-training"}
+      data: {trial_segment: "fixation", task_part: "non-trial"}
     }
     timeline.push(fixation);
 
+    // preload audio for stripes trial - this can be used immediately before any stripes trial,
+    // as long as the to-be-loaded audio is stored in the 'current_audio_files' variable
+    var stripes_preload = {
+      type: 'preload',
+      audio: function() {
+        return current_audio_files;
+      },
+      show_progress_bar: false
+    };
+
     // set up a STRIPES training trial using the values from training_trial_info and add it to the timeline
-    var training_trial = {
+    var training_with_answers = {
       type: 'stripes',
-      stimuli: training_trial_info.stimuli,
+      stimuli: function(){
+        return current_audio_files
+      },
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
-      correct_choice: training_trial_info.correct_choice,
+      correct_choice: function() {
+        return current_correct_choice
+      },
       prompt_audio: 'Please listen to the sounds A, X, and B.',
-      prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.',
+      prompt_response: 'Select the odd one out.<br> Correct answer is highlighted green.',
       show_answer: true,
       show_feedback: true,
       data: training_trial_info
     };
-    timeline.push(training_trial);
+    
+    var training_loop = {
+      timeline: [stripes_preload, training_with_answers],
+      loop_function: function(){
+        n_training_trials++;
+
+        // re-randomise parameters and use that to redefine the global variable with the audio files
+        current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); 
+        current_audio_files = (function() {
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
+          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          })();
+
+        if (verbosity == 1){
+          console.log('trials completed: ',n_training_trials)
+          console.log('next audio files: ',current_audio_files)
+        };
+
+        // terminate after 6 repeats
+        if (n_training_trials < 6){
+          return true
+        } else {
+          return false
+        }
+      }
+    };
+
+    timeline.push(training_loop);
 
     // set up the start pretest message and add to the timeline
     var start_pretest = {
-      type: 'instructions-hide-first-back',
+      type: 'instructions',
       pages: [
         '<div class="instructions-text"><p>Training is complete.</p>'+
         '<p>In the following pre-test, the correct answer will not be highlighted.</p>'+
@@ -123,45 +231,153 @@
     // add another fixation to the timeline
     timeline.push(fixation);
 
-    // set up pretest trials using the values from pretest_trial_info and add to the timeline
-    var pretest_trial = {
+    // set up pretest trials 
+    var pre_test_screening = {
       type: 'stripes',
-      stimuli: jsPsych.timelineVariable('stimuli'), 
+      stimuli: function() {
+        return current_audio_files;
+      }, 
       stimuli_timing: [1000,1000,1000,1000],
       choices: ["A","X","B"],
-      correct_choice: jsPsych.timelineVariable('correct_choice'),
-      prompt_audio: 'Please listen to the sounds A, X, and B.',
-      prompt_response: function() {
-        return 'Select the sound (A or B) that is most<br>different from the other two sounds. ('+jsPsych.timelineVariable('correct_choice',true)+' is correct)'
+      correct_choice: function() {
+        return current_correct_choice
       },
+      prompt_audio: 'Please listen to the sounds A, X, and B.',
+      prompt_response:'Select the odd one out.',
       show_feedback: true,
-      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: jsPsych.timelineVariable('trial_segment'), task_part: jsPsych.timelineVariable('task_part')}
+      data: {trial_number: jsPsych.timelineVariable('trial_number'), trial_segment: 'screening', task_part: 'pre-test-screening'}
+    };
+    
+    // loop the pretest trials
+    var pretest_loop = {
+      timeline: [stripes_preload, pre_test_screening],
+      loop_function: function(){
+        n_pretest_trials++;
+        // update global variable for looping
+        current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3);
+        current_audio_files = (function() {
+          var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
+          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          })();
+        // Check if 4/5 answers are correct, if not present another 5 trials, up to 20 trials total
+
+        if (verbosity == 1){
+          console.log('trials completed: ', n_pretest_trials)
+          console.log('next audio files: ', current_audio_files)
+        }
+         
+        //Repeat if not a multiple of 5 and less than 21 trials done
+        if (n_pretest_trials < 5){
+          return true
+        } else if (!Number.isInteger((n_pretest_trials)/5) && n_pretest_trials < 20){
+          return true
+        } else {
+          // check if last 4/5 are correct
+          var last_five_acc = jsPsych.data.get().last(10).filter({accuracy: true}).count();
+          if (verbosity == 1){
+            console.log('Correct out of last five: ', last_five_acc);
+          }
+          if (last_five_acc > 3){
+            // if correct end loop
+            easier_version = false;
+            console.log("Continue to adaptive task")
+            return false
+          } else if (n_pretest_trials < 20){
+            // if incorrect loop again till next 5
+            return true
+          } else {
+          // if they've done 20 trials without getting 4 in a row, end loop and pass a global variable to make them do the easy task 
+            easier_version = true;
+            console.log("Do easier version");
+            return false
+          }           
+        }
+      }
     };
 
-    var pretest_trial_procedure = {
-      timeline: [pretest_trial],
-      timeline_variables: pretest_trial_info,
-      randomize_order: true
-    };
-    timeline.push(pretest_trial_procedure);
+    timeline.push(pretest_loop);
 
     // set up the start adaptive message and add to the timeline
     var start_adaptive = {
-      type: 'instructions-hide-first-back',
+      type: 'instructions',
       pages: function() {
-        var pretest_trials = jsPsych.data.get().filter({task_part: 'stripes-pretest'});
-        var pretest_total = pretest_trials.count();
-        var pretest_correct = pretest_trials.filter({accuracy: true}).count();
-        var text = '<div class="instructions-text"><p>You got '+pretest_correct.toString()+'/'+pretest_total.toString()+' correct.</p>'+
-          '<p>You will now start the adaptive test.</p><p>You will no longer see feedback about your responses.</p>'+
+      //  var pretest_trials = jsPsych.data.get().filter({task_part: 'pre-test-screening'});
+      //  var pretest_total = pretest_trials.count();
+      //  var pretest_correct = pretest_trials.filter({accuracy: true}).count();
+        if (easier_version){
+        var text = '<div class="instructions-text"><p>Training complete, you will now begin the main part of the experiment</p>'+
+          '<p>You will be asked to make the odd-one-out judgement 30 times, try and get as many right as you can.</p>'+
           '<p>Please click Next to start</p></div>';
         return [text];
+        } else {
+        var text = '<div class="instructions-text"><p>Training complete, you will now begin the main part of the experiment</p>'+
+          '<p>The stimuli will sometimes be easy to distinguish and sometimes more difficult. If you are not sure, please guess.</p>'+
+          '<p>Please click Next to start</p></div>';
+        return [text];
+        }
       },
       show_clickable_nav: true,
       button_label_previous: 'Back',
       data: {task_part: "start-adaptive"}
     };
     timeline.push(start_adaptive);
+
+    // simple task (difficulty set to lowest, not adaptive)
+    var easy_trial = {
+      type:'stripes',
+      stimuli_timing: [1000,1000,1000,1000],
+      choices: ["A","X","B"],
+      stimuli:function() {
+        return current_audio_files;
+      }, 
+      correct_choice: function () { 
+        return current_correct_choice;
+      },
+      prompt_audio: 'Please listen to the sounds A, X, and B.',
+      prompt_response: 'Select the sound (A or B) that is most<br>different from the other two sounds.',
+      show_feedback: true,
+      data: function() {
+        // we're using a dynamic parameter here so that we can access the current value of 
+        // trial_count and save that value as the 'trial_number' in the data for each trial
+        return {trial_number: easy_trial_count, trial_segment: 'stripes-trial', task_part: 'stripes-easy'};
+      }
+    };
+
+    // loop the easy trial
+    var easy_loop = {
+      timeline: [stripes_preload, easy_trial],
+      loop_function: function(){
+        easy_trial_count++;
+        // update global variable for looping
+        current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
+          // randomly select rove values for the next trial
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); // eventually rove will have values 0-10
+
+        current_audio_files = 
+        (function() {
+        var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
+        var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
+        var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
+        return [up_audio_file, down_1_audio_file, down_2_audio_file];
+        })();
+        
+        if (verbosity == 1){
+          console.log('trials completed: ', easy_trial_count)
+          console.log('next audio files: ', current_audio_files)
+        }
+
+        //Repeat if less than 30 trials done
+        if (easy_trial_count < 30){
+          return true
+        } else { 
+            return false
+        }           
+      }
+    };
+
 
     // adaptive task
     var adaptive_trial = {
@@ -183,96 +399,142 @@
       data: function() {
         // we're using a dynamic parameter here so that we can access the current value of 
         // trial_count and save that value as the 'trial_number' in the data for each trial
-        return {trial_number: trial_count, trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'};
+        return {trial_number: adaptive_trial_count, trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'};
       }
     };
+
+
+    var stair = new Staircase({
+      stair_density:{
+        firstVal: current_density, 
+        down: 2, //how many good answers per bad answer before difficulty changes
+        stepChangeFactor: 1,
+        firstStepSize: 0.5,
+        secondStepSize:0.2,
+        reversalsBeforeStepChange: 4, //will be 4 eventually
+        direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
+        startingMoveDirection: "none", // used for counting whether first change counts as a reversal
+        limits: [min_density, max_density],
+        reversalLimit: 8, // will be 10 eventually
+        verbosity: 1,
+        maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
+        maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the minimum difficulty
+      }
+    });
+    
+    stair.init();
+
 
     // set up a 'loop node' to repeat the trial procedure 
     // the loop_function runs after each trial to 
     // 1. update any dynamic trial parameters
     // 2. check to see if the loop should stop or continue
+     
     var adaptive_trial_loop = {
-      timeline: [adaptive_trial],
+      timeline: [stripes_preload, adaptive_trial],
       loop_function: function() {
-        trial_count++;
+        adaptive_trial_count++;
+         
         
-        
-        // TO DO: code here to update any global variables that are used as dynamic parameters in the adaptive trial:
+        // update any global variables that are used as dynamic parameters in the adaptive trial:
         // - current_audio_files
         // - current_density
         // - current_correct_choice
         // - current_rove
-        // eventually this will be done using the jsStaircase library
         
         // randomly select a correct choice for the next trial - either A or B
         current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
 
         // randomly select rove values for the next trial
-        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2],3); // eventually rove will have values 0-10
+        current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); // eventually rove will have values 0-10
 
         // update the current density level based on the accuracy of the last response
         // within the limits of the density
         // this parameter doesn't actually do anything in the plugin yet
         last_response_acc = jsPsych.data.get().filter({trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'}).last(1).values()[0].accuracy;
         console.log('response accuracy: ', last_response_acc);
+        
+        stair.next(last_response_acc)
 
-        if (last_response_acc == true) {
-          if (current_density * 10 + 1 <= max_density * 10) {
-            current_density = (current_density*10 + 1) / 10;
-          }
-        } else {
-          if (current_density * 10 - 1 >= min_density * 10) {
-            current_density = (current_density * 10 -1) / 10;
-          }
-        }
-          
+        density = stair.getActive().val[stair.getActive().val.length-1]
+
+
         current_audio_files = 
           (function() {
-          var up_audio_file = 'audio/up_'+current_density.toFixed(1)+'_'+current_rove[0]+'.wav';
-          var down_1_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[1]+'.wav';
-          var down_2_audio_file = 'audio/down_'+current_density.toFixed(1)+'_'+current_rove[2]+'.wav';
+          var up_audio_file = 'audio/stripes_u_'+density.toFixed(1)+'_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
         
         // print info about the next trial to the console
-        console.log('next trial number: ', trial_count);
+        if (verbosity ==1){
+        console.log('next trial number: ', adaptive_trial_count);
         console.log('next correct choice: ', current_correct_choice);
-        console.log('next density: ', current_density);
+        console.log('next density: ', density);
         console.log('next rove', current_rove);
         console.log('next audio files', current_audio_files);
-
-        // TO DO: check to see if the conditions have been met to end the trial loop
+        }
+        // check to see if the conditions have been met to end the trial loop
         // eventually this will be done using the jsStaircase library (based on number of reversals etc.)
         // but for now we'll stop based on the number of trials
-        
+        var stair_name = stair.getActiveName();
 
-        if (trial_count < 10) {
-          // loop over the adaptive trial again
-          return true;
+         // return true or false for the loop to continue based on whether the stair limit is reached
+        if (stair.reversalLimitReached('stair_density')) {
+            // stop this track if reversal limit reached
+            stair.deactivate('stair_density');
+            stair.lock('stair_density');
+            console.log('reversal limit reached, no other available tracks');
+              return false;
+        }
+        else {
+          return true
+        };
+      },
+    }; 
+
+    // depending on results from pretest, do adaptive or easy main experiment
+    var run_easy = {
+      timeline: [easy_loop],
+      conditional_function: function(){
+        if(easier_version){
+            return true;
         } else {
-          // stop the loop when trial_count reaches 10
-          return false;
+            return false;
         }
       }
-    };
-    timeline.push(adaptive_trial_loop);
+    }
+    timeline.push(run_easy);
 
-    var show_data = {
-      type: 'html-button-response',
-      stimulus: function() {
-        var html = '<p>Below is the data that has been recorded from this session.</p><p>Click the next button at the bottom of the page to end the experiment.</p>';
-        html += '<pre id="jspsych-data-display">'+jsPsych.data.get().json(true)+'</pre>';
-        return html;
-      },
-      choices: ['Next']
-    };
-    timeline.push(show_data);
+    var run_adaptive = {
+      timeline: [adaptive_trial_loop],
+      conditional_function: function(){
+        if(easier_version){
+            return false;
+        } else {
+            return true;
+        }
+      }
+    }
+    timeline.push(run_adaptive);
+
+    var thank_you_page = {
+      type: 'instructions',
+      pages: ['<div class="instructions-text"><p>Well done!</p><p>Thank you for participating in our experiment.</p>'+
+        '<p>Please press "Next" to finish.</p></div>'
+      ],
+      show_clickable_nav: true,
+      button_label_previous: 'Back',
+      data: {task_part: "instructions"}
+    }
+    timeline.push(thank_you_page);
+
 
     // run experiment
     jsPsych.init({
       timeline: timeline,
-      preload_audio: all_audio_files,
       on_finish: function() {
         jatos.submitResultData(jsPsych.data.get().json(), jatos.startNextComponent);
       }
