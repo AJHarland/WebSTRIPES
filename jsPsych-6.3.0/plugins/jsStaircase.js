@@ -279,7 +279,7 @@ Staircase.prototype.checkForReversal = function(currentStair) {
       console.log('reversal '+stair.reversals+'; down to up');
     }
     return true;
-  } else if (stair.maxTrialsAtMinVal && stair.moveDirectionArray[stair.trialCount] == "down") {
+  } else if (stair.maxTrialsAtMinVal && stair.trialCount>=stair.maxTrialsAtMinVal && stair.moveDirectionArray[stair.trialCount] == "down") {
     // if 'maxTrialsAtMinVal' is set and the next trial direction is 'down', then check whether we've hit the maxTrialsAtMinVal threshold for a reversal 
     var last_n_vals = stair.val.slice(-stair.maxTrialsAtMinVal);
     var all_vals_at_min_limit = last_n_vals.every(function(val) {return val == stair.limits[0];});
@@ -293,7 +293,7 @@ Staircase.prototype.checkForReversal = function(currentStair) {
       }
     }
     return true;
-  } else if (stair.maxTrialsAtMaxVal && stair.moveDirectionArray[stair.trialCount] == "up") {
+  } else if (stair.maxTrialsAtMaxVal && stair.trialCount<=stair.maxTrialsAtMaxVal && stair.moveDirectionArray[stair.trialCount] == "up") {
     // if 'maxTrialsAtMaxVal' is set and the next trial direction is 'up', then check whether we've hit the maxTrialsAtMaxVal threshold for a reversal 
     var last_n_vals = stair.val.slice(-stair.maxTrialsAtMaxVal);
     var all_vals_at_max_limit = last_n_vals.every(function(val) {return val == stair.limits[1];});
