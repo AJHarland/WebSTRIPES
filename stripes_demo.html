@@ -54,13 +54,13 @@
    var welcome_page1 = {
       type: 'instructions',
       pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
-        '<p>When you click next, the experiment will start loading the files it needs, this can take a couple of minutes.</p>'+
         '<p>Please ensure you have a good wifi signal and are not using your mobile data.</p>'+
-        '<p>After 5 mins, if you cannot see a loading bar or if it does not seem to be progressing, </p>'+
-        '<p>please close your internet browser tab and try again. Hitting refresh will not work</p>'
-        ],
+        '<p>Before taking part in this study please read the PIS document that you were emailed.</p>'+
+        '<p>If you are aged over 18, understand the statements in the PIS document</p>'+
+        '<p>and freely consent to participate in the study, click on the "I Agree" button</p></div>'],
       show_clickable_nav: true,
       allow_backward: false,
+      button_label_next: 'I Agree',
     };
 
     timeline.push(welcome_page1);
@@ -89,9 +89,9 @@
       pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
         '<p>1. Please connect your cochlear implant to your phone as if you were going to make a phone call or listen to music.</p>'+
         '<p>2. Set the volume to a low level.</p>'+
-        '<p>3. If you are using a phone, please turn it on its side and enable auto-rotate in your phone settings</p><br>'+
+        '<p>3. If you are using a phone, please turn it on its side (landscape) and enable auto-rotate in your phone settings</p><br>'+
         '<p>On the next page you will hear an example sound from the experiment and will be able to adjust your volume again.</p>'+
-        '<p>But it is best to start with a low volume and then increase it slowly.</p></div>'],
+        '<p>But it is best to start with a very low volume and then increase it slowly.</p></div>'],
       show_clickable_nav: true,
       allow_backward: false,
     };

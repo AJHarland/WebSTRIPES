@@ -83,7 +83,7 @@ button.stripes-btn:active {
 
 /* prompt */
 div#jspsych-stripes-prompt {
-    font-size: 25px;
+    font-size: 30px;
     line-height: 1.5em;
     height: 70px;
 }
