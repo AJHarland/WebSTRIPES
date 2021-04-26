@@ -100,7 +100,7 @@ function Staircase(stairs) {
         // if so, then the difficulty should move in the other direction! (harder instead of easier)
         // 'moveDirectionArray' for next trial was set in the 'checkForReversal' function
         if (stair.moveDirectionArray[stair.trialCount] == "down") {
-          // the only reason the next trial should be 'up' is if we hit the maxTrialsAtMaxVal limit
+          // the only reason the next trial should be 'down' is if we hit the maxTrialsAtMaxVal limit
           max_trials_at_max_val_reached = true;
         }
       } else {
@@ -117,16 +117,16 @@ function Staircase(stairs) {
         if (!max_trials_at_max_val_reached) {
           // task should get easier 
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           } else { // higher values = easier, lower values = harder
-            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           }
         } else {
           // task should get harder (go down because max trials at max stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           } else { // higher values = easier, lower values = harder
-            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           }
         }
         if (stair.verbosity>0) {
@@ -193,16 +193,16 @@ function Staircase(stairs) {
         if (!max_trials_at_min_val_reached) {
           // task should get harder
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           } else { // higher values = easier, lower values = harder
-            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           }
         } else {
           // task should get easier (go up because max trials at min stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           } else { // higher values = easier, lower values = harder
-            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
+            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
           }
         }
         if (stair.verbosity>0) {
@@ -279,29 +279,29 @@ Staircase.prototype.checkForReversal = function(currentStair) {
       console.log('reversal '+stair.reversals+'; down to up');
     }
     return true;
-  } else if (stair.maxTrialsAtMinVal && stair.trialCount>=stair.maxTrialsAtMinVal && stair.moveDirectionArray[stair.trialCount] == "down") {
-    // if 'maxTrialsAtMinVal' is set and the next trial direction is 'down', then check whether we've hit the maxTrialsAtMinVal threshold for a reversal 
+  } else if (stair.maxTrialsAtMinVal && stair.trialCount>=stair.maxTrialsAtMinVal && stair.moveDirectionArray[stair.trialCount] == "up") {
+    // if 'maxTrialsAtMinVal' is set and the next trial direction is 'up', then check whether we've hit the maxTrialsAtMinVal threshold for a reversal 
     var last_n_vals = stair.val.slice(-stair.maxTrialsAtMinVal);
     var all_vals_at_min_limit = last_n_vals.every(function(val) {return val == stair.limits[0];});
     if (all_vals_at_min_limit) {
-      // mark this as a reversal and change the next trial direction to 'up'
+      // mark this as a reversal and change the next trial direction to 'down'
       stair.isReversal.push(true);
       stair.reversals++;
-      stair.moveDirectionArray[stair.trialCount] = 'up';
+      stair.moveDirectionArray[stair.trialCount] = 'down';
       if (stair.verbosity>0) {
         console.log('reversal '+stair.reversals+'; max trials at min difficulty');
       }
     }
     return true;
-  } else if (stair.maxTrialsAtMaxVal && stair.trialCount<=stair.maxTrialsAtMaxVal && stair.moveDirectionArray[stair.trialCount] == "up") {
-    // if 'maxTrialsAtMaxVal' is set and the next trial direction is 'up', then check whether we've hit the maxTrialsAtMaxVal threshold for a reversal 
+  } else if (stair.maxTrialsAtMaxVal && stair.trialCount>=stair.maxTrialsAtMaxVal && stair.moveDirectionArray[stair.trialCount] == "down") {
+    // if 'maxTrialsAtMaxVal' is set and the next trial direction is 'down', then check whether we've hit the maxTrialsAtMaxVal threshold for a reversal 
     var last_n_vals = stair.val.slice(-stair.maxTrialsAtMaxVal);
     var all_vals_at_max_limit = last_n_vals.every(function(val) {return val == stair.limits[1];});
     if (all_vals_at_max_limit) {
-      // mark this as a reversal and change the next trial direction to 'down'
+      // mark this as a reversal and change the next trial direction to 'up'
       stair.isReversal.push(true);
       stair.reversals++;
-      stair.moveDirectionArray[stair.trialCount] = 'down';
+      stair.moveDirectionArray[stair.trialCount] = 'up';
       if (stair.verbosity>0) {
         console.log('reversal '+stair.reversals+'; max trials at max difficulty');
       }

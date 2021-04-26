@@ -418,7 +418,7 @@
         reversalLimit: 8,
         verbosity: 1,
         maxTrialsAtMinVal: 4, // will trigger reversal after x trials at the minimum difficulty
-        maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the minimum difficulty
+        maxTrialsAtMaxVal: 4, // will trigger reversal after x trials at the maximum difficulty
       }
     });
     
@@ -461,9 +461,9 @@
 
         current_audio_files = 
           (function() {
-          var up_audio_file = 'audio/stripes_u_'+density.toFixed(1)+'_'+current_rove[0]+'.mp3';
-          var down_1_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[1]+'.mp3';
-          var down_2_audio_file = 'audio/stripes_d_'+density.toFixed(1)+'_'+current_rove[2]+'.mp3';
+          var up_audio_file = 'audio/stripes_u_'+density+'_'+current_rove[0]+'.mp3';
+          var down_1_audio_file = 'audio/stripes_d_'+density+'_'+current_rove[1]+'.mp3';
+          var down_2_audio_file = 'audio/stripes_d_'+density+'_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
           })();
 
