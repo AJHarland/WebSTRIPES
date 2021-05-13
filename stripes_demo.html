@@ -56,8 +56,7 @@
       pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
         '<p>Please ensure you have a good wifi signal and are not using your mobile data.</p>'+
         '<p>Before taking part in this study please read the PIS document that you were emailed.</p>'+
-        '<p>If you are aged over 18, understand the statements in the PIS document</p>'+
-        '<p>and freely consent to participate in the study, click on the "I Agree" button</p></div>'],
+        '<p>If you are aged over 18, understand the statements in the PIS document and freely consent to participate in the study, click on the "I Agree" button</p></div>'],
       show_clickable_nav: true,
       allow_backward: false,
       button_label_next: 'I Agree',
@@ -218,8 +217,8 @@
     var start_pretest = {
       type: 'instructions',
       pages: [
-        '<div class="instructions-text"><p>Training is complete.</p>'+
-        '<p>In the following pre-test, the correct answer will not be highlighted.</p>'+
+        '<div class="instructions-text"><p>Example trials complete.</p>'+
+        '<p>In the following pre-test training, the correct answer will not be highlighted.</p>'+
         '<p>Please press next to continue.</p></div>'
       ],
       show_clickable_nav: true,
@@ -448,9 +447,8 @@
         // randomly select rove values for the next trial
         current_rove = jsPsych.randomization.sampleWithoutReplacement([0, 1, 2, 3, 4, 5, 6, 7, 8, 9],3); // eventually rove will have values 0-10
 
-        // update the current density level based on the accuracy of the last response
-        // within the limits of the density
-        // this parameter doesn't actually do anything in the plugin yet
+        // update the current density by sending the accuracy of the response to the staircase plugin 
+        
         last_response_acc = jsPsych.data.get().filter({trial_segment: 'stripes-trial', task_part: 'stripes-adaptive'}).last(1).values()[0].accuracy;
         console.log('response accuracy: ', last_response_acc);
         
@@ -523,7 +521,7 @@
     var thank_you_page = {
       type: 'instructions',
       pages: ['<div class="instructions-text"><p>Well done!</p><p>Thank you for participating in our experiment.</p>'+
-        '<p>Please press "Next" to finish.</p></div>'
+        '<p>Please press "Next" to send us your results.</p></div>'
       ],
       show_clickable_nav: true,
       button_label_previous: 'Back',
