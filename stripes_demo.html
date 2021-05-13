@@ -410,11 +410,11 @@
         stepChangeFactor: 1,
         firstStepSize: 0.5,
         secondStepSize:0.2,
-        reversalsBeforeStepChange: 4, 
+        reversalsBeforeStepChange: 5, // 1st reversal doesn't count
         direction: 1, //1 indicate easier = lower values; -1 would indicate that easier = greater values 
-        startingMoveDirection: "none", // used for counting whether first change counts as a reversal
+        startingMoveDirection: "up", // used for counting whether first change counts as a reversal
         limits: [min_density, max_density],
-        reversalLimit: 8,
+        reversalLimit: 9, // 1st reversal doesn't count
         verbosity: 1,
       }
     });
@@ -452,7 +452,8 @@
         
         stair.next(last_response_acc)
 
-        density = stair.getActive().val[stair.getActive().val.length-1]
+        density = stair.getActive().val[stair.getActive().val.length-1];
+        density = density.toFixed(1);
 
 
         current_audio_files = 

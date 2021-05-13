@@ -117,27 +117,27 @@ function Staircase(stairs) {
         if (!max_trials_at_max_val_reached) {
           // task should get easier 
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           } else { // higher values = easier, lower values = harder
-            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         } else {
           // task should get harder (go down because max trials at max stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           } else { // higher values = easier, lower values = harder
-            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         }
         if (stair.verbosity>0) {
           console.log('current direction: ', stair.moveDirectionArray[stair.moveDirectionArray.length-1]);
         }
-        return diff_value.toFixed(1);
+        return diff_value;
 
       } else {
         // down threshold not met so difficulty value stays the same
         diff_value = stair.val[stair.val.length-1];
-        return diff_value.toFixed(1);
+        return diff_value;
       }
     },
     harder: function(sc, stair) { // harder is 'down' (last response was correct)
@@ -193,26 +193,26 @@ function Staircase(stairs) {
         if (!max_trials_at_min_val_reached) {
           // task should get harder
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           } else { // higher values = easier, lower values = harder
-            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         } else {
           // task should get easier (go up because max trials at min stimulus value has been reached)
           if (stair.direction == '1') { // higher values = harder, lower values = easier  
-            diff_value = (stair.val[stair.val.length-1]*10-stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]-stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           } else { // higher values = easier, lower values = harder
-            diff_value = (stair.val[stair.val.length-1]*10+stair.stepSizeArray[stair.stepSizeArray.length-1]*10)/10; 
+            diff_value = stair.val[stair.val.length-1]+stair.stepSizeArray[stair.stepSizeArray.length-1]; 
           }
         }
         if (stair.verbosity>0) {
           console.log('current direction: ', stair.moveDirectionArray[stair.moveDirectionArray.length-1]);
         }
-        return diff_value.toFixed(1);
+        return diff_value;
       } else {
         // down threshold not met so difficulty value stays the same
         diff_value = stair.val[stair.val.length-1];
-        return diff_value.toFixed(1);
+        return diff_value;
       }
     }
   };
