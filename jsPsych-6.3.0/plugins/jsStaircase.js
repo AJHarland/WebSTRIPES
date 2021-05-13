@@ -132,12 +132,12 @@ function Staircase(stairs) {
         if (stair.verbosity>0) {
           console.log('current direction: ', stair.moveDirectionArray[stair.moveDirectionArray.length-1]);
         }
-        return diff_value;
+        return diff_value.toFixed(1);
 
       } else {
         // down threshold not met so difficulty value stays the same
         diff_value = stair.val[stair.val.length-1];
-        return diff_value;
+        return diff_value.toFixed(1);
       }
     },
     harder: function(sc, stair) { // harder is 'down' (last response was correct)
@@ -208,11 +208,11 @@ function Staircase(stairs) {
         if (stair.verbosity>0) {
           console.log('current direction: ', stair.moveDirectionArray[stair.moveDirectionArray.length-1]);
         }
-        return diff_value;
+        return diff_value.toFixed(1);
       } else {
         // down threshold not met so difficulty value stays the same
         diff_value = stair.val[stair.val.length-1];
-        return diff_value;
+        return diff_value.toFixed(1);
       }
     }
   };
