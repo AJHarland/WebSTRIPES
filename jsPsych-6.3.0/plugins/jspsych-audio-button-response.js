@@ -150,7 +150,7 @@ jsPsych.plugins["audio-button-response"] = (function () {
 
       //show prompt if there is one
       if (trial.prompt !== null) {
-        html += trial.prompt;
+        html = trial.prompt + html;
       }
 
       display_element.innerHTML = html;

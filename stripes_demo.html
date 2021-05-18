@@ -61,11 +61,11 @@
     // list image files for preloading
     var all_image_files = ['img/instructions_screenshot.png'];
     
-    // preload calibration audio and image files
+    // preload calibration audio and example image files 
     var preload = {
     type: 'preload',
     images: all_image_files,
-    audio: ['audio/calibration_sound.wav'], //all_audio_files,
+    audio: ['audio/calibration_sound.wav', 'audio/silence_30s.mp3'], // non-stripes files. The stripes files are preloaded before each trial.
   };
 
    timeline.push(preload); 
@@ -130,25 +130,37 @@
     timeline.push(audio_calibration_loop);
 
 
-    // set up instructions and add to the timeline
+    // set up instructions with silence playing (to maintain bluetooth connection)
     var training_instructions = {
-      type: 'instructions',
-      pages: ['<div class="instructions-text"><p>In each trial, your task is to select the odd one out of three sounds.</p>'+
-        '<p>Each sound has noisy static at the beginning and end of it.</p>'+
-        '<p>The odd one out will be the first (labelled “A”) or last (labelled “B”) sound.</p>'+
-        '<p>After all three sounds have played, tap on the odd one out, either A or B.<p></div>',
+      type: 'audio-button-response',
+      stimulus: 'audio/silence_30s.mp3',
+      prompt: ['<div class="instructions-text"><p>In each trial, your task is to select the odd one out of three sounds. Each sound has noisy static at the beginning and end of it. The odd one out will be the first (labelled “A”) or last (labelled “B”) sound. After all three sounds have played, tap on the odd one out, either A or B.<p></div>'+
         '<div class="instructions-text"><p>Here is what the screen will look like:</p>'+
         '<img src="'+all_image_files[0]+'" style="width:90%;">'+
-        '<p>When you press Next, you will have a chance to try it six times.</p>'+
-        '<p>As they are training examples, we have highlighted the correct answer in green.</p>'+
-        '<p>Try to familiarise yourself to the sounds and listen carefully to the difference.</p></div>'
-      ],
-      show_clickable_nav: true,
-      button_label_previous: 'Back',
+        '<p>When you press Next, you will have a chance to try it six times. As they are training examples, we have highlighted the correct answer in green. Try to familiarise yourself to the sounds and listen carefully to the difference.</p></div>'
+        ], 
+      choices: ['Next'],
+      button_html: "<button class='jspsych-btn'>%choice%</button>", 
+      response_ends_trial: true,
+      trial_ends_after_audio: true,
+      response_allowed_while_playing: true, // allows button to be pressed anytime - as it instantly loops when audio ends
       data: {task_part: "instructions"}
     }
 
-    timeline.push(training_instructions);
+    // loop instructions with silence until 'next' is pressed
+    var training_instructions_loop = {
+        timeline: [training_instructions],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].response === 0) { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+
+    timeline.push(training_instructions_loop);
     
     // define the trial parameters that are specific to each trial
     // training trial
@@ -516,7 +528,7 @@
         }
       }
     }
-    
+
     timeline.push(run_adaptive);
 
     var thank_you_page = {
