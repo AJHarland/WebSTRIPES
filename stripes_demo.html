@@ -46,12 +46,33 @@
           var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
           var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
           return [up_audio_file, down_1_audio_file, down_2_audio_file];
-          })();      
+          })();     
+
+    // preload audio function for stripes trial - this can be used immediately before any stripes trial,
+    // as long as the to-be-loaded audio is stored in the 'current_audio_files' variable
+    var stripes_preload = {
+      type: 'preload',
+      audio: function() {
+        return current_audio_files;
+      },
+      show_progress_bar: false
+    };
 
     // list image files for preloading
     var all_image_files = ['img/instructions_screenshot.png'];
     
-   // welcome and instructions
+    // preload calibration audio and image files
+    var preload = {
+    type: 'preload',
+    images: all_image_files,
+    audio: ['audio/calibration_sound.wav'], //all_audio_files,
+  };
+
+   timeline.push(preload); 
+
+    
+
+// welcome and instructions
    var welcome_page1 = {
       type: 'instructions',
       pages: ['<div class="instructions-text"><p>Welcome to the online STRIPES test</p>'+
@@ -65,24 +86,6 @@
 
     timeline.push(welcome_page1);
 
-    // preload calibration audio and image files
-    var preload = {
-    type: 'preload',
-    images: all_image_files,
-    audio: ['audio/calibration_sound.wav'], //all_audio_files,
-  };
-
-   timeline.push(preload);
-
-
-    // define the trial parameters that are specific to each trial
-    // training trial
-    var training_trial_info = {
-      stimuli: current_audio_files,
-      trial_segment: 'training-with-answers',
-      task_part: 'stripes-training'
-    };  
-    
     // welcome and instructions
     var welcome_page_2 = {
       type: 'instructions',
@@ -123,6 +126,7 @@
             }
         }
     }; 
+
     timeline.push(audio_calibration_loop);
 
 
@@ -143,27 +147,16 @@
       button_label_previous: 'Back',
       data: {task_part: "instructions"}
     }
+
     timeline.push(training_instructions);
-
-    // set up fixation and add to the timeline
-    var fixation = {
-      type: 'html-keyboard-response',
-      stimulus: '<span style="font-size:50px;">+</span>',
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 500,
-      data: {trial_segment: "fixation", task_part: "non-trial"}
-    }
-    timeline.push(fixation);
-
-    // preload audio for stripes trial - this can be used immediately before any stripes trial,
-    // as long as the to-be-loaded audio is stored in the 'current_audio_files' variable
-    var stripes_preload = {
-      type: 'preload',
-      audio: function() {
-        return current_audio_files;
-      },
-      show_progress_bar: false
-    };
+    
+    // define the trial parameters that are specific to each trial
+    // training trial
+    var training_trial_info = {
+      stimuli: current_audio_files,
+      trial_segment: 'training-with-answers',
+      task_part: 'stripes-training'
+    }; 
 
     // set up a STRIPES training trial using the values from training_trial_info and add it to the timeline
     var training_with_answers = {
@@ -215,7 +208,7 @@
     timeline.push(training_loop);
 
     // set up the start pretest message and add to the timeline
-    var start_pretest = {
+    var pretest_instructions = {
       type: 'instructions',
       pages: [
         '<div class="instructions-text"><p>Example trials complete.</p>'+
@@ -224,12 +217,10 @@
       ],
       show_clickable_nav: true,
       button_label_previous: "Back",
-      data: {task_part: "start-pretest"}
+      data: {task_part: "pretest-instructions"}
     };
-    timeline.push(start_pretest);
 
-    // add another fixation to the timeline
-    timeline.push(fixation);
+    timeline.push(pretest_instructions);
 
     // set up pretest trials 
     var pre_test_screening = {
@@ -323,6 +314,7 @@
       button_label_previous: 'Back',
       data: {task_part: "start-adaptive"}
     };
+
     timeline.push(start_adaptive);
 
     // simple task (difficulty set to lowest, not adaptive)
@@ -511,6 +503,7 @@
         }
       }
     }
+
     timeline.push(run_easy);
 
     var run_adaptive = {
@@ -523,6 +516,7 @@
         }
       }
     }
+    
     timeline.push(run_adaptive);
 
     var thank_you_page = {
