@@ -221,18 +221,33 @@
 
     // set up the start pretest message and add to the timeline
     var pretest_instructions = {
-      type: 'instructions',
-      pages: [
-        '<div class="instructions-text"><p>Example trials complete.</p>'+
+      type: 'audio-button-response',
+      stimulus: 'audio/silence_30s.mp3',
+      prompt: ['<div class="instructions-text"><p>Example trials complete.</p>'+
         '<p>In the following pre-test training, the correct answer will not be highlighted.</p>'+
-        '<p>Please press next to continue.</p></div>'
-      ],
-      show_clickable_nav: true,
-      button_label_previous: "Back",
-      data: {task_part: "pretest-instructions"}
-    };
+        '<p>Please press next to continue.</p></div>'], 
+      choices: ['Next'],
+      button_html: "<button class='jspsych-btn'>%choice%</button>", 
+      response_ends_trial: true,
+      trial_ends_after_audio: true,
+      response_allowed_while_playing: true, // allows button to be pressed anytime - as it instantly loops when audio ends
+      data: {task_part: "instructions"}
+    }
 
-    timeline.push(pretest_instructions);
+    // loop instructions with silence until 'next' is pressed
+    var pretest_instructions_loop = {
+        timeline: [pretest_instructions],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].response === 0) { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+
+    timeline.push(pretest_instructions_loop);
 
     // set up pretest trials 
     var pre_test_screening = {
@@ -304,9 +319,10 @@
     timeline.push(pretest_loop);
 
     // set up the start adaptive message and add to the timeline
-    var start_adaptive = {
-      type: 'instructions',
-      pages: function() {
+    var adaptive_instructions = {
+      type: 'audio-button-response',
+      stimulus: 'audio/silence_30s.mp3',
+      prompt: function() {
       //  var pretest_trials = jsPsych.data.get().filter({task_part: 'pre-test-screening'});
       //  var pretest_total = pretest_trials.count();
       //  var pretest_correct = pretest_trials.filter({accuracy: true}).count();
@@ -322,12 +338,29 @@
         return [text];
         }
       },
-      show_clickable_nav: true,
-      button_label_previous: 'Back',
-      data: {task_part: "start-adaptive"}
+      choices: ['Next'],
+      button_html: "<button class='jspsych-btn'>%choice%</button>", 
+      response_ends_trial: true,
+      trial_ends_after_audio: true,
+      response_allowed_while_playing: true, // allows button to be pressed anytime - as it instantly loops when audio ends
+      data: {task_part: "adaptive-instructions"}
     };
 
-    timeline.push(start_adaptive);
+    // loop instructions with silence until 'next' is pressed
+    var adaptive_instructions_loop = {
+        timeline: [adaptive_instructions],
+        loop_function: function(data) {
+            var last_data = jsPsych.data.get().last(1).values();
+            if (last_data[0].response === 0) { // button pressed, end loop
+                return false;
+            } else { 
+                return true;
+            }
+        }
+    }; 
+
+    timeline.push(adaptive_instructions_loop);
+
 
     // simple task (difficulty set to lowest, not adaptive)
     var easy_trial = {
@@ -530,18 +563,6 @@
     }
 
     timeline.push(run_adaptive);
-
-    var thank_you_page = {
-      type: 'instructions',
-      pages: ['<div class="instructions-text"><p>Well done!</p><p>Thank you for participating in our experiment.</p>'+
-        '<p>Please press "Next" to send us your results.</p></div>'
-      ],
-      show_clickable_nav: true,
-      button_label_previous: 'Back',
-      data: {task_part: "instructions"}
-    }
-    timeline.push(thank_you_page);
-
 
     // run experiment
     jsPsych.init({
