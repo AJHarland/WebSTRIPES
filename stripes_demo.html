@@ -37,6 +37,7 @@
     var current_density = 1.1; 
     var max_density = 20.0; 
     var min_density = 1.1; 
+    var silence = 'audio/silence_30s.mp3';
 
      // global variables for the training tasks (adaptive tasks uses current_audio_files too)
     var current_correct_choice = jsPsych.randomization.sampleWithoutReplacement(["A","B"],1)[0];
@@ -45,7 +46,7 @@
           var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
           var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
           var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
-          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          return [up_audio_file, down_1_audio_file, down_2_audio_file,silence];
           })();     
 
     // preload audio function for stripes trial - this can be used immediately before any stripes trial,
@@ -176,7 +177,7 @@
       stimuli: function(){
         return current_audio_files
       },
-      stimuli_timing: [1000,1000,1000,1000],
+      stimuli_timing: [1000,1000,1000,1000,50],
       choices: ["A","X","B"],
       correct_choice: function() {
         return current_correct_choice
@@ -200,7 +201,7 @@
           var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
           var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
           var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
-          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          return [up_audio_file, down_1_audio_file, down_2_audio_file, silence];
           })();
 
         if (verbosity == 1){
@@ -255,7 +256,7 @@
       stimuli: function() {
         return current_audio_files;
       }, 
-      stimuli_timing: [1000,1000,1000,1000],
+      stimuli_timing: [1000,1000,1000,1000,50],
       choices: ["A","X","B"],
       correct_choice: function() {
         return current_correct_choice
@@ -278,7 +279,7 @@
           var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
           var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
           var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
-          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          return [up_audio_file, down_1_audio_file, down_2_audio_file, silence];
           })();
         // Check if 4/5 answers are correct, if not present another 5 trials, up to 20 trials total
 
@@ -365,7 +366,7 @@
     // simple task (difficulty set to lowest, not adaptive)
     var easy_trial = {
       type:'stripes',
-      stimuli_timing: [1000,1000,1000,1000],
+      stimuli_timing: [1000,1000,1000,1000,50],
       choices: ["A","X","B"],
       stimuli:function() {
         return current_audio_files;
@@ -398,7 +399,7 @@
         var up_audio_file = 'audio/stripes_u_1.1_'+current_rove[0]+'.mp3';
         var down_1_audio_file = 'audio/stripes_d_1.1_'+current_rove[1]+'.mp3';
         var down_2_audio_file = 'audio/stripes_d_1.1_'+current_rove[2]+'.mp3';
-        return [up_audio_file, down_1_audio_file, down_2_audio_file];
+        return [up_audio_file, down_1_audio_file, down_2_audio_file, silence];
         })();
         
         if (verbosity == 1){
@@ -419,7 +420,7 @@
     // adaptive task
     var adaptive_trial = {
       type: 'stripes',
-      stimuli_timing: [1000,1000,1000,1000],
+      stimuli_timing: [1000,1000,1000,1000,50],
       choices: ["A","X","B"],
       stimuli: function() {
         return current_audio_files;
@@ -499,7 +500,7 @@
           var up_audio_file = 'audio/stripes_u_'+density+'_'+current_rove[0]+'.mp3';
           var down_1_audio_file = 'audio/stripes_d_'+density+'_'+current_rove[1]+'.mp3';
           var down_2_audio_file = 'audio/stripes_d_'+density+'_'+current_rove[2]+'.mp3';
-          return [up_audio_file, down_1_audio_file, down_2_audio_file];
+          return [up_audio_file, down_1_audio_file, down_2_audio_file, silence];
           })();
 
         

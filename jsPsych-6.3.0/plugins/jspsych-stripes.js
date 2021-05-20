@@ -219,19 +219,19 @@ jsPsych.plugins["stripes"] = (function() {
     */
     // check parameters and set defaults
     // stimuli array
-    if (trial.stimuli.length !== 3) {
-      console.error('Error in stripes plugin. The stimuli must be an array with 3 audio files.')
+    if (trial.stimuli.length !== 4) {
+      console.error('Error in stripes plugin. The stimuli must be an array with 4 audio files.')
     } 
 
     // set up the stimuli timing array
     if (trial.stimuli_timing === null) {
       // if stimuli_timing isn't specified then use the default value and repeat for all 3 sounds
-      trial.stimuli_timing = Array(4).fill(plugin.info.parameters.stimuli_timing.default[0]);
-    } else if (!Array.isArray(trial.stimuli_timing) || trial.stimuli_timing.length !== 4) {
-      console.error('Error in stripes plugin. The length of the stimuli_timing array must be either 1 (same start and post-stimulus delay duration for each sound) or 4 (one starting delay and 3 delay durations per A/X/B sound).');
+      trial.stimuli_timing = Array(5).fill(plugin.info.parameters.stimuli_timing.default[0]);
+    } else if (!Array.isArray(trial.stimuli_timing) || trial.stimuli_timing.length !== 5) {
+      console.error('Error in stripes plugin. The length of the stimuli_timing array must be either 1 (same start and post-stimulus delay duration for each sound) or 5 (one starting delay and 4 delay durations per A/X/B/silence sound).');
     } else if (trial.stimuli_timing.length == 1) {
-      // if only one value is specified, then use it for all 3 sounds
-      trial.stimuli_timing = Array(4).fill(trial.stimuli_timing[0]);
+      // if only one value is specified, then use it for all 4 sounds
+      trial.stimuli_timing = Array(5).fill(trial.stimuli_timing[0]);
     } 
 
   	// set up button HTML parameters for each sound/button
@@ -257,17 +257,19 @@ jsPsych.plugins["stripes"] = (function() {
     } 
 
     // setup audio_array
-    // this should contain the three sound files, in order: A, X and B
+    // this should contain the four sound files, in order: A, X, B and silence
     // trial.stimuli[0] is always correct, trial.stimuli[1] and [2] are always incorrect
     audio_array = [];
     if (trial.correct_choice == "A") {
       audio_array.push(trial.stimuli[0]);
       audio_array.push(trial.stimuli[1]);
       audio_array.push(trial.stimuli[2]);
+      audio_array.push(trial.stimuli[3]);
     } else {
       audio_array.push(trial.stimuli[2]);
       audio_array.push(trial.stimuli[1]);
       audio_array.push(trial.stimuli[0]);
+      audio_array.push(trial.stimuli[3]);
     }
 
     // add the CSS to show the correct/incorrect answer, if show_answer is true
@@ -390,12 +392,11 @@ jsPsych.plugins["stripes"] = (function() {
 
     // create the audio onended function (helper function)
     // this function depends on (1) whether the sound is a reference or target, and (2) whether or not it's the last sound
-    function create_onended_fn(is_target_sound, is_last_stim) {
+    function create_onended_fn(is_last_stim) {
       var onended_fn;
-      if (is_target_sound) { // audio is one of the choices (A or B)
         if (is_last_stim) { // this is the last audio file
           onended_fn = function() {
-            jsPsych.pluginAPI.setTimeout(enable_buttons, trial.stimuli_timing[audio_count+1]);
+            jsPsych.pluginAPI.setTimeout(allow_response, trial.stimuli_timing[audio_count+1]);
             change_button_to_audio_off(audio_count-1);
           };
         } else { // not the last stim
@@ -403,38 +404,19 @@ jsPsych.plugins["stripes"] = (function() {
             jsPsych.pluginAPI.setTimeout(play_next, trial.stimuli_timing[audio_count+1]);
             change_button_to_audio_off(audio_count-1);
           };
-        }
-      } else { // audio is the reference stim (X)
-        onended_fn = function() {
-          jsPsych.pluginAPI.setTimeout(play_next, trial.stimuli_timing[audio_count+1]);
-          change_button_to_audio_off(audio_count-1);
-        };
-      }
+        }      
       return onended_fn; 
-    }
-
-    function get_audio_start_time(diff) {
-      // TO DO: code here to randomly select from a range of times, based on current density
-      var time = 0; // start time is start of the file
-      return time;
     }
 
 		// function to start next audio
     function play_next() {
-      // is this the 2nd sound file ("target" aka X) or not ("reference" aka 'A' or 'B')?
-      var is_target_sound = true;
-      if (audio_count === 1) {
-        is_target_sound = false;
-      }
       // is this the last of the audio choices?
       var is_last_stim = false;
-      if (audio_count+1 >= audio_array.length) {
+      if (audio_count+1 == 3) {
         is_last_stim = true;
       }
       // create the on_ended function for this stim
-      var curr_onended_fn = create_onended_fn(is_target_sound, is_last_stim);
-      // get the audio file start time, based on current density
-      var audio_start_time = get_audio_start_time(trial.density);
+      var curr_onended_fn = create_onended_fn(is_last_stim);
       // set up and play next audio 
       jsPsych.pluginAPI.getAudioBuffer(audio_array[audio_count])
       .then(function(buffer) {
@@ -459,7 +441,37 @@ jsPsych.plugins["stripes"] = (function() {
         console.error(`Failed to load audio file "${audio_array[audio_count]}".`)
         console.error(err)
       })
-     
+    }
+
+    // function to allow participants to respond
+    function allow_response(){
+       enable_buttons();
+       play_silence();
+    }
+
+    // function to start silence
+    function play_silence() {
+      // set up and play silence
+      jsPsych.pluginAPI.getAudioBuffer(audio_array[3])
+      .then(function(buffer) {
+        if (method == "web_audio") {
+          source = context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(context.destination);
+          source.onended = play_silence;
+          startTime = context.audio_start_time;
+          source.start(startTime);
+        } else { // HTML audio
+          audio = buffer;
+          audio.currentTime = audio_start_time;
+          audio.addEventListener('ended', play_silence);
+          audio.play();
+        }
+      })
+      .catch(function(err) {
+        console.error(`Failed to load audio file "${audio_array[3]}".`)
+        console.error(err)
+      })
     }
 
     // function to enable the target (A and B) buttons for response and add the response prompt to the screen
